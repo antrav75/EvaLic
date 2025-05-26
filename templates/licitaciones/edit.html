@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Editar Licitación{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Editar Licitación</h5>
+
+    {% if current_stage %}
+    <div class="alert alert-info">
+      <strong>Etapa actual:</strong> {{ current_stage }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+      <div class="mb-3">
+        <label for="external_id" class="form-label">ID Externo</label>
+        <input type="text" class="form-control" id="external_id" name="external_id" value="{{ lic.external_id }}" required {% if not is_responsable %}readonly{% endif %}>
+      </div>
+      <div class="mb-3">
+        <label for="title" class="form-label">Título</label>
+        <input type="text" class="form-control" id="title" name="title" value="{{ lic.title }}" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Descripción</label>
+        <textarea class="form-control" id="description" name="description">{{ lic.description }}</textarea>
+      </div>
+      <div class="mb-3">
+        <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ lic.fecha_inicio }}">
+      </div>
+      <div class="mb-3">
+        <label for="fecha_adjudicacion" class="form-label">Fecha Adjudicación</label>
+        <input type="date" class="form-control" id="fecha_adjudicacion" name="fecha_adjudicacion" value="{{ lic.fecha_adjudicacion }}">
+      </div>
+
+      <button type="submit" class="btn btn-warning">Actualizar</button>
+      <a href="{{ url_for('licitaciones.index') }}" class="btn btn-secondary">Cancelar</a>
+      {% if current_stage == 'Borrador' %}
+  <a href="{{ url_for('criterios.index', lic_id=lic.id) }}" class="btn btn-info ms-2">Criterios</a>
+{% else %}
+  <a href="#" class="btn btn-secondary ms-2 disabled" tabindex="-1" aria-disabled="true">Criterios</a>
+{% endif %}
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#avanzarEstadoModal">Avanzar estado</button>
+      <button type="button" class="btn btn-secondary ms-2" data-bs-toggle="modal" data-bs-target="#evaluadoresModal">Evaluadores</button>
+      <a href="{{ url_for('ofertas.index', licitacion_id=lic.id) }}" class="btn btn-info ms-2">Ofertas</a>
+      {% if current_stage == 'Sobre1' %}
+  <a href="{{ url_for('ofertas.evaluar_sobre1', licitacion_id=lic.id) }}" class="btn btn-success ms-2">Evaluar</a>
+{% else %}
+  <a href="#" class="btn btn-success ms-2 disabled" tabindex="-1" aria-disabled="true">Evaluar</a>
+{% endif %}
+    </form>
+
+    <!-- Modal Avanzar Estado -->
+    <div class="modal fade" id="avanzarEstadoModal" tabindex="-1" aria-labelledby="avanzarEstadoModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="avanzarEstadoModalLabel">Avanzar Estado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <form id="avanzarEstadoForm" method="post" action="{{ url_for('licitaciones.avanzar_estado', lic_id=lic.id) }}">
+              <div class="mb-3">
+                <label for="fecha_avance" class="form-label">Fecha de avance</label>
+                <input type="date" class="form-control" id="fecha_avance" name="fecha_avance" required>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" form="avanzarEstadoForm" onclick="return confirm('¿Está seguro de que desea avanzar de fase?');">Avanzar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Asignar Evaluadores -->
+    <div class="modal fade" id="evaluadoresModal" tabindex="-1" aria-labelledby="evaluadoresModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="evaluadoresModalLabel">Asignar Evaluadores</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col">
+                <label>Disponibles</label>
+                <select multiple id="evaluadores_available" class="form-control" style="height:200px;">
+                  {% for user in evaluadores_all %}
+                    {% if user.id not in selected_ids %}
+                      <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col d-flex flex-column align-items-center justify-content-center">
+                <button type="button" id="addEvaluador" class="btn btn-success mb-2">»</button>
+                <button type="button" id="removeEvaluador" class="btn btn-danger">«</button>
+              </div>
+              <div class="col">
+                <label>Asignados</label>
+                <select multiple id="evaluadores_selected" class="form-control" style="height:200px;">
+                  {% for user in evaluadores_selected %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" id="saveEvaluadores" class="btn btn-primary">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const addBtn = document.getElementById('addEvaluador'),
+        remBtn = document.getElementById('removeEvaluador'),
+        saveBtn = document.getElementById('saveEvaluadores'),
+        avail   = document.getElementById('evaluadores_available'),
+        assigned= document.getElementById('evaluadores_selected'),
+        modalEl = document.getElementById('evaluadoresModal'),
+        modal   = new bootstrap.Modal(modalEl);
+
+  document.querySelector('[data-bs-target="#evaluadoresModal"]').addEventListener('click', ()=> modal.show());
+  addBtn.addEventListener('click', ()=> Array.from(avail.selectedOptions).forEach(o=> assigned.add(o)));
+  remBtn.addEventListener('click', ()=> Array.from(assigned.selectedOptions).forEach(o=> avail.add(o)));
+  saveBtn.addEventListener('click', ()=>{
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{{ url_for('licitaciones.evaluadores_licitacion', lic_id=lic.id) }}";
+    Array.from(assigned.options).forEach(option => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'evaluadores_selected';
+      input.value = option.value;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  });
+});
+</script>
+{% endblock %}

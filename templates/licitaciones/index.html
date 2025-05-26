@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="card-title">Licitaciones</h2>
+
+    <form method="get" class="row g-3 mb-4 flex-nowrap">
+      <div class="col-md-2">
+        <input type="text" name="external_id" class="form-control" placeholder="Código externo" value="{{ request.args.get('external_id', '') }}">
+      </div>
+      <div class="col-md-2">
+        <input type="text" name="title" class="form-control" placeholder="Título" value="{{ request.args.get('title', '') }}">
+      </div>
+      <div class="col-md-2">
+        <select name="fecha_tipo" class="form-select">
+          <option value="">-- Filtrar por fecha --</option>
+          <option value="fecha_inicio" {{ 'selected' if request.args.get('fecha_tipo') == 'fecha_inicio' else '' }}>Fecha de inicio</option>
+          <option value="fecha_adjudicacion" {{ 'selected' if request.args.get('fecha_tipo') == 'fecha_adjudicacion' else '' }}>Fecha de adjudicación</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input type="date" name="fecha_desde" class="form-control" value="{{ request.args.get('fecha_desde', '') }}">
+      </div>
+      <div class="col-md-2">
+        <input type="date" name="fecha_hasta" class="form-control" value="{{ request.args.get('fecha_hasta', '') }}">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+      </div>
+    </form>
+
+    <a href="{{ url_for('licitaciones.create_licitacion_route') }}" class="btn btn-success mb-3">Añadir licitación</a>
+
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Código externo</th>
+          <th>Título</th>
+          <th>Fecha inicio</th>
+          <th>Fecha adjudicación</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lic in licitaciones %}
+        <tr>
+          <td>{{ lic.external_id }}</td>
+          <td>{{ lic.title }}</td>
+          <td>{{ lic.fecha_inicio }}</td>
+          <td>{{ lic.fecha_adjudicacion }}</td>
+          <td>
+            <a href="{{ url_for('licitaciones.edit_licitacion_route', lic_id=lic.id) }}" class="btn btn-sm btn-warning">Editar</a>
+            {% if is_responsable %}
+              <form action="{{ url_for('licitaciones.delete_licitacion_route', lic_id=lic.id) }}" method="post" style="display:inline-block;" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta licitación?');">
+                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% if current_page > 1 %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for_other_page(current_page+1) }}">Siguiente &raquo;</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</div>
+{% endblock %}

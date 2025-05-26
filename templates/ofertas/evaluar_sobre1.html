@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h3>Evaluación Sobre1 - Licitación {{ licitacion_id }}</h3>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  <form method="post">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Fecha de presentación</th>
+          <th>Admitido</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in ofertas %}
+        <tr>
+          <td>{{ o.nombreempresa }}</td>
+          <td>{{ o.fechapresentacion }}</td>
+          <td>
+            <input type="checkbox" name="admitidasobre1_{{ o.licitante_id }}" {% if o.admitidasobre1 %}checked{% endif %}>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="{{ url_for('licitaciones.edit_licitacion_route', lic_id=licitacion_id) }}" class="btn btn-secondary">Volver</a>
+  </form>
+</div>
+{% block scripts %}
+  {{ super() }}
+<script>
+  setTimeout(function() {
+    var alerts = document.getElementsByClassName('alert');
+    for (var i = 0; i < alerts.length; i++) {
+      alerts[i].style.display = 'none';
+    }
+  }, 5000);
+</script>
+{% endblock %}
+{% endblock %}

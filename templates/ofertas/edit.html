@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h3>Editar Oferta</h3>
+  <form method="post">
+    <input type="hidden" name="next" value="{{ next }}">
+    <input type="hidden" name="licitacion_id" value="{{ oferta.licitacion_id }}">
+    <div class="mb-3">
+      <label for="licitante_id">Empresa licitante</label>
+      <select name="licitante_id" id="licitante_id" class="form-select">
+        {% for lic in licitantes %}
+          <option value="{{ lic.id }}" {% if lic.id == oferta.licitante_id %}selected{% endif %}>{{ lic.nombreempresa }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="fechapresentacion">Fecha de presentación</label>
+      <input type="date" name="fechapresentacion" id="fechapresentacion" class="form-control" value="{{ oferta.fechapresentacion }}" required>
+    </div>
+    <button type="submit" class="btn btn-success">Actualizar</button>
+    <a href="{{ url_for('ofertas.index', licitacion_id=oferta.licitacion_id) }}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

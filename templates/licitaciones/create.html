@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Nueva Licitación{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Crear Licitación</h5>
+    <form method="post">
+      <div class="mb-3">
+        <label for="external_id" class="form-label">ID Externo</label>
+        <input type="text" class="form-control" id="external_id" name="external_id" required>
+      </div>
+      <div class="mb-3">
+        <label for="title" class="form-label">Título</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Descripción</label>
+        <textarea class="form-control" id="description" name="description"></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+      </div>
+      <div class="mb-3">
+        <label for="fecha_adjudicacion" class="form-label">Fecha Adjudicación</label>
+        <input type="date" class="form-control" id="fecha_adjudicacion" name="fecha_adjudicacion">
+      </div>
+      <button type="submit" class="btn btn-primary">Crear</button>
+      <a href="{{ url_for('licitaciones.index') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

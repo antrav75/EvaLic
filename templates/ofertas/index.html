@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h3>Ofertas{% if licitacion_id %} de Licitación {{ licitacion_id }}{% endif %}</h3>
+  <div class="mb-3">
+    <a href="{{ url_for('ofertas.new', licitacion_id=licitacion_id, next=request.url) }}" class="btn btn-primary">Nueva Oferta</a>
+  </div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Empresa</th>
+        <th>Fecha de presentación</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in ofertas %}
+        <tr>
+          <td>{{ o.nombreempresa }}</td>
+          <td>{{ o.fechapresentacion }}</td>
+          <td>
+            <a href="{{ url_for('ofertas.edit', licitacion_id=licitacion_id, licitante_id=o.licitante_id, next=request.url) }}" class="btn btn-sm btn-warning">Editar</a>
+            <form method="post">
+              <input type="hidden" name="next" value="{{ next }}" action="{{ url_for('ofertas.delete', licitacion_id=licitacion_id, licitante_id=o.licitante_id, next=request.url) }}" style="display:inline;">
+              <button class="btn btn-sm btn-danger" onclick="return confirm('Eliminar oferta?');">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{{ url_for('licitaciones.edit_licitacion_route', lic_id=licitacion_id) }}" class="btn btn-secondary">Volver a Licitaciones</a>
+  <a href="{{ url_for('licitantes.index', licitacion_id=licitacion_id) }}" class="btn btn-secondary ms-2">Licitantes</a>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Crear Criterio{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Nuevo Criterio</h5>
+    <form method="post">
+      <input type="hidden" name="licitacion_id" value="{{ lic_id }}">
+      <div class="mb-3">
+        <label for="NombreCriterio" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="NombreCriterio" name="NombreCriterio" required>
+      </div>
+      <div class="mb-3">
+        <label for="Descripcion" class="form-label">Descripción</label>
+        <textarea class="form-control" id="Descripcion" name="Descripcion"></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="tipocriterio_id" class="form-label">Tipo de Criterio</label>
+        <select class="form-select" id="tipocriterio_id" name="tipocriterio_id" required>
+          <option value="" disabled selected>Seleccione tipo</option>
+          {% for t in tipo_opts %}
+          <option value="{{ t.id }}" data-tipo="{{ t.TipoCriterio }}">{{ t.TipoCriterio }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3" id="peso-field" style="display:none;">
+        <label for="Peso" class="form-label">Peso</label>
+        <input type="number" class="form-control" id="Peso" name="Peso">
+      </div>
+      <div class="mb-3" id="formula-field" style="display:none;">
+        <label for="formula_id" class="form-label">Fórmula</label>
+        <select class="form-select" id="formula_id" name="formula_id">
+          <option value="" disabled selected>Seleccione fórmula</option>
+          {% for f in formula_opts %}
+          <option value="{{ f.id }}">{{ f.NombreFormula }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Crear</button>
+      <a href="{{ url_for('criterios.index', lic_id=lic_id) }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const tipoSelect = document.getElementById('tipocriterio_id');
+  const pesoField = document.getElementById('peso-field');
+  const formulaField = document.getElementById('formula-field');
+  const inputPeso = document.getElementById('Peso');
+  const selectFormula = document.getElementById('formula_id');
+
+  function toggleFields() {
+    const selectedOption = tipoSelect.selectedOptions[0];
+    const tipo = selectedOption ? selectedOption.getAttribute('data-tipo') : '';
+    if (tipo === 'Técnico') {
+      pesoField.style.display = 'block';
+      inputPeso.required = true;
+    } else {
+      pesoField.style.display = 'none';
+      inputPeso.required = false;
+      inputPeso.value = '';
+    }
+    if (tipo === 'Económico') {
+      formulaField.style.display = 'block';
+      selectFormula.required = true;
+    } else {
+      formulaField.style.display = 'none';
+      selectFormula.required = false;
+      selectFormula.selectedIndex = 0;
+    }
+  }
+
+  tipoSelect.addEventListener('change', toggleFields);
+  toggleFields();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Licitantes</h2>
+  <a href="{{ url_for('licitantes.new') }}" class="btn btn-primary mb-2">Nuevo Licitante</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Empresa</th>
+        <th>CIF</th>
+        <th>Dirección</th>
+        <th>Ciudad</th>
+        <th>Provincia</th>
+        <th>Teléfono</th>
+        <th>Email</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lic in licitantes %}
+      <tr>
+        <td>{{ lic.id }}</td>
+        <td>{{ lic.nombreempresa }}</td>
+        <td>{{ lic.cif }}</td>
+        <td>{{ lic.direccion }}</td>
+        <td>{{ lic.ciudad }}</td>
+        <td>{{ lic.provincia }}</td>
+        <td>{{ lic.telefono }}</td>
+        <td>{{ lic.email }}</td>
+        <td>
+          <a href="{{ url_for('licitantes.edit', id=lic.id) }}" class="btn btn-sm btn-warning">Editar</a>
+          <form method="post" action="{{ url_for('licitantes.delete', id=lic.id) }}" style="display:inline">
+            <button class="btn btn-sm btn-danger" onclick="return confirm('Eliminar licitante?')">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if licitacion_id %}
+  <a href="{{ url_for('ofertas.index', licitacion_id=licitacion_id) }}" class="btn btn-secondary">
+    Volver a Ofertas
+  </a>
+{% else %}
+  <a href="{{ url_for('licitaciones.index') }}" class="btn btn-secondary">
+    Volver a Licitaciones
+  </a>
+{% endif %}
+</div>
+{% endblock %}
