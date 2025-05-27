@@ -2,6 +2,7 @@ from flask import (
     Blueprint, render_template, request, redirect,
     url_for, flash, session, current_app
 )
+
 from services.criterio_service import (
     listar, obtener, crear, actualizar, borrar,
     tipos, formulas
@@ -12,24 +13,12 @@ from models.dao import get_db
 
 criterios_bp = Blueprint('criterios', __name__, url_prefix='/criterios')
 
-def _check_phase(db, lic_id):
-    lic = get_licitacion(db, lic_id)
-    if not lic:
-        flash('Licitación no encontrada', 'danger')
-        return False, redirect(url_for('licitaciones.edit_licitacion_route', lic_id=lic_id))
-    phase = get_current_stage(db, lic_id)
-    if phase != 'Borrador':
-        # Fuera de fase Borrador no permite criterios
-        return False, redirect(url_for('licitaciones.edit_licitacion_route', lic_id=lic_id))
-    return True, None
 @criterios_bp.route('/<int:lic_id>')
+
 def index(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db(current_app)
-    ok, response = _check_phase(db, lic_id)
-    if not ok:
-        return response
     items = listar(db, lic_id)
     return render_template(
         'criterios/index.html',
@@ -42,9 +31,6 @@ def create_criterio_route(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db(current_app)
-    ok, response = _check_phase(db, lic_id)
-    if not ok:
-        return response
     if request.method == 'POST':
         try:
             data = request.form.to_dict()
@@ -67,9 +53,6 @@ def edit_criterio_route(lic_id, crit_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db(current_app)
-    ok, response = _check_phase(db, lic_id)
-    if not ok:
-        return response
     crit = obtener(db, crit_id)
     if not crit:
         flash('Criterio no encontrado', 'danger')
@@ -94,9 +77,6 @@ def delete_criterio_route(lic_id, crit_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db(current_app)
-    ok, response = _check_phase(db, lic_id)
-    if not ok:
-        return response
     try:
         borrar(db, crit_id)
         flash('Criterio eliminado', 'success')
