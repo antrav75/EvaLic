@@ -51,6 +51,8 @@ def create_criterio_route(lic_id):
             data['licitacion_id'] = lic_id
             crear(db, data, session['user_id'])
             flash('Criterio creado exitosamente', 'success')
+            # redirijo al listado de criterios
+            return redirect(url_for('criterios.index', lic_id=lic_id))
         except Exception as e:
             flash(str(e), 'danger')
     return render_template(
@@ -75,6 +77,8 @@ def edit_criterio_route(lic_id, crit_id):
         try:
             actualizar(db, crit_id, request.form.to_dict())
             flash('Criterio actualizado', 'success')
+            # redirijo al listado de criterios
+            return redirect(url_for('criterios.index', lic_id=lic_id))
         except Exception as e:
             flash(str(e), 'danger')
     return render_template(
@@ -98,3 +102,6 @@ def delete_criterio_route(lic_id, crit_id):
         flash('Criterio eliminado', 'success')
     except Exception as e:
         flash(str(e), 'danger')
+
+    # ¡Muy importante! devolver algo. Redirigimos al listado:
+    return redirect(url_for('criterios.index', lic_id=lic_id))

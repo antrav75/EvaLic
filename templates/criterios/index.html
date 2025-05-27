@@ -1,6 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Criterios{% endblock %}
 {% block content %}
+
+{# --- bloque de flashes --- #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">Criterios para Licitación {{ lic_id }}</h5>
