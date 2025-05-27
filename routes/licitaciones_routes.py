@@ -12,7 +12,7 @@ licitaciones_bp = Blueprint('licitaciones', __name__, url_prefix='/licitaciones'
 
 @licitaciones_bp.route('/', methods=('GET',))
 def index():
-    if 'user_id' not in session:
+    if 'user_id' not in session or session.get('role_id') != 2:
         return redirect(url_for('auth.login'))
 
     db = get_db(current_app)

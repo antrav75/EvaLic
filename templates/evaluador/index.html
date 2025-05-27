@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Mis licitaciones</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for c, msg in messages %}
+    <div class="alert alert-{{ c }}">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Titulo</th>
+      <th>Inicio</th>
+      <th>Fin</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lic in licitaciones %}
+    <tr>
+      <td>{{ lic.title }}</td>
+      <td>{{ lic.fecha_inicio }}</td>
+      <td>{{ lic.fecha_fin }}</td>
+      <td>
+        <a href="#" class="btn btn-primary btn-sm">Evaluar</a>
+        <a href="#" class="btn btn-secondary btn-sm">Resultados</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

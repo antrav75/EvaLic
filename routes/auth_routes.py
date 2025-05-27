@@ -22,8 +22,10 @@ def login():
                 return redirect(url_for('user.dashboard'))  # Administrador
             elif user['role_id'] == 2:
                 return redirect(url_for('licitaciones.index'))  # Responsable
+            elif user['role_id'] == 3:
+                return redirect(url_for('evaluador.index')) # Evaluador
             else:
-                return redirect(url_for('auth.login'))  # Evaluador o desconocido
+                return redirect(url_for('auth.login'))  # Evaluador o Desconocido
         error = 'Credenciales inválidas'
     return render_template('login.html', error=error)
 

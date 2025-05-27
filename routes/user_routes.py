@@ -8,7 +8,7 @@ user_bp = Blueprint('user', __name__, url_prefix='/')
 
 @user_bp.route('useradmin')
 def dashboard():
-    if 'user_id' not in session:
+    if 'user_id' not in session or session.get('role_id') != 1:
         return redirect(url_for('auth.login'))
     db = get_db(current_app)
     admin_id = get_role_id(db, 'administrador')
