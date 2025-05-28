@@ -78,7 +78,7 @@ def init_db(app):
 
      CREATE TABLE IF NOT EXISTS formulas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        NombreFormula NOT NULL                                                              
+        NombreFormula NOT NULL UNIQUE                                                              
     );
                      
      CREATE TABLE IF NOT EXISTS criterios (
