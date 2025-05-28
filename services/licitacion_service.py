@@ -6,7 +6,8 @@ from models.licitaciones_data import (
     edit_licitacion as data_update,
     remove_licitacion as data_delete
 )
-from models.etapas_data import create_etapa, get_current_etapa, delete_etapas_by_licitacion
+from models.stage_data import create_stage, delete_stages_by_tender
+from services.stage_service import get_current_stage_name
 
 def list_licitaciones(db):
     return data_list(db)
@@ -22,7 +23,7 @@ def create_licitacion(db, external_id, title, description, fecha_inicio, fecha_a
     # 1) Crear la licitación y obtener su ID
     lic_id = data_create(db, external_id, title, description, fecha_inicio, fecha_adjudicacion, user_id)
     # 2) Crear la etapa inicial (fase "Borrador", id=1)
-    create_etapa(db, lic_id, 1, fecha_inicio)
+    create_stage(db, lic_id, 1, fecha_inicio)
     return lic_id
 
 def edit_licitacion(db, lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion):
@@ -40,11 +41,11 @@ def remove_licitacion(db, lic_id, user_id):
     # Verifica permiso del usuario
     if lic['user_id'] != user_id:
         raise PermissionError("No tienes permiso para eliminar esta licitación")
-    current_stage = get_current_etapa(db, lic_id)
+    current_stage = get_current_stage_name(db, lic_id)
     if current_stage != 'Borrador':
         raise ValueError("Solo se pueden eliminar licitaciones en estado Borrador")
     # Borrar etapas asociadas
-    delete_etapas_by_licitacion(db, lic_id)
+    delete_stages_by_tender(db, lic_id)
     # Borrar la licitación
     data_delete(db, lic_id)
 

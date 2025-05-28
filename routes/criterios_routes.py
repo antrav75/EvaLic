@@ -8,7 +8,6 @@ from services.criterio_service import (
     tipos, formulas
 )
 from services.licitacion_service import get_licitacion
-from services.etapa_service import get_current_stage
 from models.dao import get_db
 
 criterios_bp = Blueprint('criterios', __name__, url_prefix='/criterios')
