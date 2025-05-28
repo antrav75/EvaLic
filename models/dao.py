@@ -73,7 +73,7 @@ def init_db(app):
                      
      CREATE TABLE IF NOT EXISTS tipo_criterios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        TipoCriterio TEXT NOT NULL UNIQUE CHECK(TipoCriterio IN ('Administrativo','Técnico','Económico'))
+        TipoCriterio TEXT NOT NULL UNIQUE CHECK(TipoCriterio IN ('Técnico','Económico'))
     );   
 
      CREATE TABLE IF NOT EXISTS formulas (
@@ -86,6 +86,7 @@ def init_db(app):
         NombreCriterio TEXT NOT NULL,
         descripcion TEXT,
         peso INTEGER,
+        PrecioBase INTEGER,             
         tipocriterio_id INTEGER NOT NULL,
         licitacion_id INTEGER NOT NULL,
         formula_id INTEGER,                          
@@ -164,7 +165,7 @@ def init_db(app):
     db.commit()            
 
     # Insertar tipos de formula por defecto
-    Formulas_habituales = ['Formula1','Formula2','Formula3']
+    Formulas_habituales = ['Formula inversa proporcional','Formula proporcional por baja','Formula proporcional reparto de puntos']
     for Formula in Formulas_habituales:
         db.execute(
             "INSERT OR IGNORE INTO formulas (NombreFormula) VALUES (?);", (Formula,)

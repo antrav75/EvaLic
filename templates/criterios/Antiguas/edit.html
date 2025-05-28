@@ -36,10 +36,6 @@
           {% endfor %}
         </select>
       </div>
-      <div class="mb-3" id="precio-field" style="display:none;">
-        <label for="PrecioBase" class="form-label">Precio Base</label>
-        <input type="number" step="0.01" class="form-control" id="PrecioBase" name="PrecioBase" value="{{ criterio.PrecioBase }}">
-      </div>
       <button type="submit" class="btn btn-primary">Actualizar</button>
       <a href="{{ url_for('criterios.index', lic_id=lic_id) }}" class="btn btn-secondary">Cancelar</a>
     </form>
@@ -50,10 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const tipoSelect = document.getElementById('tipocriterio_id');
   const pesoField = document.getElementById('peso-field');
   const formulaField = document.getElementById('formula-field');
-  const precioField = document.getElementById('precio-field');
   const inputPeso = document.getElementById('Peso');
   const selectFormula = document.getElementById('formula_id');
-  const inputPrecio = document.getElementById('PrecioBase');
 
   function toggleFields() {
     const selectedOption = tipoSelect.selectedOptions[0];
@@ -69,15 +63,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (tipo === 'Económico') {
       formulaField.style.display = 'block';
       selectFormula.required = true;
-      precioField.style.display = 'block';
-      inputPrecio.required = true;
     } else {
       formulaField.style.display = 'none';
       selectFormula.required = false;
       selectFormula.selectedIndex = 0;
-      precioField.style.display = 'none';
-      inputPrecio.required = false;
-      inputPrecio.value = '';
     }
   }
 

@@ -31,7 +31,7 @@ def new():
         }
         create_licitante_logic(current_app, data)
         flash('Licitante creado', 'success')
-        return redirect(request.form.get(url_for('licitantes.index')))
+        return redirect(url_for('licitantes.index'))
     return render_template('licitantes/create.html')
 
 @licitantes_bp.route('/<int:id>/edit', methods=['GET', 'POST'])

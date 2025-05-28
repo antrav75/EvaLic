@@ -11,12 +11,10 @@ def obtener(db, crit_id):
     return get_criterio(db, crit_id)
 
 def crear(db, data, usuario_id):
-    # Calculamos peso (0 si no se envía), fórmula (None si no aplica)
-    # y precio base (None si no aplica)
+    # Calculamos peso (0 si no se envía) y fórmula (None si no aplica)
     peso = int(data.get('Peso') or 0)
     tip_id = int(data['tipocriterio_id'])
     formula = int(data.get('formula_id')) if data.get('formula_id') else None
-    precio_base = float(data.get('PrecioBase')) if data.get('PrecioBase') else None
 
     create_criterio(
         db,
@@ -25,17 +23,14 @@ def crear(db, data, usuario_id):
         peso,
         tip_id,
         int(data['licitacion_id']),
-        formula,
-        precio_base
+        formula
     )
 
 def actualizar(db, crit_id, data):
-    # Calculamos peso (0 si no se envía), fórmula (None si no aplica)
-    # y precio base (None si no aplica)
+    # Calculamos peso (0 si no se envía) y fórmula (None si no aplica)
     peso = int(data.get('Peso') or 0)
     tip_id = int(data['tipocriterio_id'])
     formula = int(data.get('formula_id')) if data.get('formula_id') else None
-    precio_base = float(data.get('PrecioBase')) if data.get('PrecioBase') else None
 
     edit_criterio(
         db,
@@ -44,8 +39,7 @@ def actualizar(db, crit_id, data):
         data.get('Descripcion'),
         peso,
         tip_id,
-        formula,
-        precio_base
+        formula
     )
 
 def borrar(db, crit_id):

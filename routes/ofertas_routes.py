@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from services.oferta_service import list_ofertas_logic, get_oferta_logic, create_oferta_logic, edit_oferta_logic, remove_oferta_logic, evaluate_sobre1_logic
 from services.licitante_service import list_licitantes_logic
+import sqlite3
 
 ofertas_bp = Blueprint('ofertas', __name__, url_prefix='/ofertas')
 
@@ -12,19 +13,48 @@ def index():
 
 @ofertas_bp.route('/new', methods=['GET', 'POST'])
 def new():
-    lic_id = request.args.get('licitacion_id')
-    next_url = request.args.get('next') or url_for('ofertas.index', licitacion_id=lic_id)
+    lic_id     = request.args.get('licitacion_id')
+    next_url   = request.args.get('next') or url_for('ofertas.index', licitacion_id=lic_id)
+
     if request.method == 'POST':
         data = {
-            'licitacion_id': lic_id,
-            'licitante_id': request.form.get('licitante_id'),
+            'licitacion_id':   lic_id,
+            'licitante_id':    request.form.get('licitante_id'),
             'fechapresentacion': request.form.get('fechapresentacion')
         }
-        create_oferta_logic(current_app, data)
-        flash('Oferta creada', 'success')
-        return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=lic_id))
+
+        try:
+            # Intentamos crear la oferta
+            create_oferta_logic(current_app, data)
+            flash('Oferta creada', 'success')
+            return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=lic_id))
+
+        except sqlite3.IntegrityError:
+            # Capturamos el UNIQUE constraint de (licitacion_id, licitante_id)
+            flash(
+                'Error: esta empresa ya ha presentado una oferta para esta licitación.',
+                'danger'
+            )
+            # Volvemos a cargar la lista de licitantes para renderizar el form
+            licitantes = list_licitantes_logic(current_app)
+            return render_template(
+                'ofertas/create.html',
+                licitacion_id=lic_id,
+                licitantes=licitantes,
+                next=next_url,
+                # opcional: volver a poner en el form lo que ya había rellenado
+                selected_licitante_id=data['licitante_id'],
+                fechapresentacion=data['fechapresentacion']
+            )
+
+    # GET
     licitantes = list_licitantes_logic(current_app)
-    return render_template('ofertas/create.html', licitacion_id=lic_id, licitantes=licitantes, next=next_url)
+    return render_template(
+        'ofertas/create.html',
+        licitacion_id=lic_id,
+        licitantes=licitantes,
+        next=next_url
+    )
 
 @ofertas_bp.route('/<int:licitacion_id>/<int:licitante_id>/edit', methods=['GET', 'POST'])
 def edit(licitacion_id, licitante_id):

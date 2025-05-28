@@ -1,46 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Editar Criterio{% endblock %}
+{% block title %}Crear Criterio{% endblock %}
 {% block content %}
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Editar Criterio</h5>
+    <h5 class="card-title">Nuevo Criterio</h5>
     <form method="post">
       <input type="hidden" name="licitacion_id" value="{{ lic_id }}">
       <div class="mb-3">
         <label for="NombreCriterio" class="form-label">Nombre</label>
-        <input type="text" class="form-control" id="NombreCriterio" name="NombreCriterio" value="{{ criterio.NombreCriterio }}" required>
+        <input type="text" class="form-control" id="NombreCriterio" name="NombreCriterio" required>
       </div>
       <div class="mb-3">
         <label for="Descripcion" class="form-label">Descripción</label>
-        <textarea class="form-control" id="Descripcion" name="Descripcion">{{ criterio.Descripcion }}</textarea>
+        <textarea class="form-control" id="Descripcion" name="Descripcion"></textarea>
       </div>
       <div class="mb-3">
         <label for="tipocriterio_id" class="form-label">Tipo de Criterio</label>
         <select class="form-select" id="tipocriterio_id" name="tipocriterio_id" required>
-          <option value="" disabled>Seleccione tipo</option>
+          <option value="" disabled selected>Seleccione tipo</option>
           {% for t in tipo_opts %}
-          <option value="{{ t.id }}" data-tipo="{{ t.TipoCriterio }}" {% if criterio.tipocriterio_id == t.id %}selected{% endif %}>{{ t.TipoCriterio }}</option>
+          <option value="{{ t.id }}" data-tipo="{{ t.TipoCriterio }}">{{ t.TipoCriterio }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="mb-3" id="peso-field" style="display:none;">
         <label for="Peso" class="form-label">Peso</label>
-        <input type="number" class="form-control" id="Peso" name="Peso" value="{{ criterio.Peso }}">
+        <input type="number" class="form-control" id="Peso" name="Peso">
       </div>
       <div class="mb-3" id="formula-field" style="display:none;">
         <label for="formula_id" class="form-label">Fórmula</label>
         <select class="form-select" id="formula_id" name="formula_id">
-          <option value="" disabled>Seleccione fórmula</option>
+          <option value="" disabled selected>Seleccione fórmula</option>
           {% for f in formula_opts %}
-          <option value="{{ f.id }}" {% if criterio.formula_id == f.id %}selected{% endif %}>{{ f.NombreFormula }}</option>
+          <option value="{{ f.id }}">{{ f.NombreFormula }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="mb-3" id="precio-field" style="display:none;">
-        <label for="PrecioBase" class="form-label">Precio Base</label>
-        <input type="number" step="0.01" class="form-control" id="PrecioBase" name="PrecioBase" value="{{ criterio.PrecioBase }}">
-      </div>
-      <button type="submit" class="btn btn-primary">Actualizar</button>
+      <button type="submit" class="btn btn-primary">Crear</button>
       <a href="{{ url_for('criterios.index', lic_id=lic_id) }}" class="btn btn-secondary">Cancelar</a>
     </form>
   </div>
@@ -50,10 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const tipoSelect = document.getElementById('tipocriterio_id');
   const pesoField = document.getElementById('peso-field');
   const formulaField = document.getElementById('formula-field');
-  const precioField = document.getElementById('precio-field');
   const inputPeso = document.getElementById('Peso');
   const selectFormula = document.getElementById('formula_id');
-  const inputPrecio = document.getElementById('PrecioBase');
 
   function toggleFields() {
     const selectedOption = tipoSelect.selectedOptions[0];
@@ -69,15 +63,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (tipo === 'Económico') {
       formulaField.style.display = 'block';
       selectFormula.required = true;
-      precioField.style.display = 'block';
-      inputPrecio.required = true;
     } else {
       formulaField.style.display = 'none';
       selectFormula.required = false;
       selectFormula.selectedIndex = 0;
-      precioField.style.display = 'none';
-      inputPrecio.required = false;
-      inputPrecio.value = '';
     }
   }
 
