@@ -7,6 +7,7 @@ from routes.licitaciones_routes import licitaciones_bp
 from routes.ofertas_routes import ofertas_bp
 from routes.licitantes_routes import licitantes_bp
 from routes.evaluador_routes import evaluador_bp
+from routes.criterios_routes import criterios_bp
 
 def create_app():
     app = Flask(__name__)
@@ -36,8 +37,6 @@ def create_app():
     app.register_blueprint(ofertas_bp)
     app.register_blueprint(licitantes_bp)
     app.register_blueprint(evaluador_bp)
-
-    from routes.criterios_routes import criterios_bp
     app.register_blueprint(criterios_bp)
 
     return app
