@@ -18,11 +18,35 @@ def index(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     db = get_db(current_app)
+
+    # 1) Recuperar todos los criterios
     items = listar(db, lic_id)
+ 
+    # 2) Aplicar filtros en memoria según formulario
+    filtro_nombre = request.args.get('filtro_nombre', '').strip()
+    filtro_tipo   = request.args.get('filtro_tipo', '')
+ 
+    if filtro_nombre:
+        items = [
+            c for c in items
+            if filtro_nombre.lower() in (c['NombreCriterio'] or '').lower()
+        ]
+ 
+    if filtro_tipo:
+        items = [
+            c for c in items
+            if c['TipoCriterio'] == filtro_tipo
+        ]
+
+    # Extraer solo el nombre de tipo para el desplegable
+    tipo_filtros = [t['TipoCriterio'] for t in tipos(db)]
+
     return render_template(
         'criterios/index.html',
         criterios=items,
-        lic_id=lic_id
+        lic_id=lic_id,
+        tipo_opts=tipo_filtros,  # ahora es lista de strings, no Rows
+        request=request
     )
 
 @criterios_bp.route('/<int:lic_id>/create', methods=('GET','POST'))

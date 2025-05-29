@@ -2,11 +2,68 @@
 {% block content %}
 <div class="container">
   <h2>Licitantes</h2>
+
+    <!-- ====== FORMULARIO DE FILTRO ====== -->
+  <form method="get" class="row g-2 mb-3 align-items-end">
+    {%- if licitacion_id %}
+      <input type="hidden" name="licitacion_id" value="{{ licitacion_id }}">
+    {%- endif %}
+
+    <div class="col">
+      <label for="filtro_nombre" class="visually-hidden">Nombre</label>
+      <input
+        type="text"
+        class="form-control"
+        id="filtro_nombre"
+        name="filtro_nombre"
+        placeholder="Nombre empresa"
+        value="{{ request.args.get('filtro_nombre','') }}"
+      >
+    </div>
+
+    <div class="col">
+      <label for="filtro_provincia" class="visually-hidden">Provincia</label>
+      <select
+        class="form-select"
+        id="filtro_provincia"
+        name="filtro_provincia"
+      >
+        <option value="">Todas</option>
+        {% for prov in provincias %}
+          <option value="{{ prov }}"
+            {% if request.args.get('filtro_provincia') == prov %}selected{% endif %}>
+            {{ prov }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col">
+      <label for="filtro_ciudad" class="visually-hidden">Ciudad</label>
+      <select
+        class="form-select"
+        id="filtro_ciudad"
+        name="filtro_ciudad"
+      >
+        <option value="">Todas</option>
+        {% for c in ciudades %}
+          <option value="{{ c }}"
+            {% if request.args.get('filtro_ciudad') == c %}selected{% endif %}>
+            {{ c }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto ms-auto">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+  </form>
+  
   <a href="{{ url_for('licitantes.new') }}" class="btn btn-primary mb-2">Nuevo Licitante</a>
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>ID</th>
         <th>Empresa</th>
         <th>CIF</th>
         <th>Dirección</th>
@@ -20,7 +77,6 @@
     <tbody>
       {% for lic in licitantes %}
       <tr>
-        <td>{{ lic.id }}</td>
         <td>{{ lic.nombreempresa }}</td>
         <td>{{ lic.cif }}</td>
         <td>{{ lic.direccion }}</td>

@@ -16,20 +16,50 @@
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">Criterios para Licitación {{ lic_id }}</h5>
-    <a href="{{ url_for('criterios.create_criterio_route', lic_id=lic_id) }}" class="btn btn-success mb-3">Nuevo Criterio</a>
+    <form method="get" class="row g-2 mb-3 align-items-end">
+     <div class="col">
+       <label for="filtro_nombre" class="visually-hidden">Nombre</label>
+       <input
+         type="text"
+         class="form-control"
+         id="filtro_nombre"
+         name="filtro_nombre"
+         placeholder="Nombre"
+         value="{{ request.args.get('filtro_nombre','') }}"
+      >
+     </div>
+     <div class="col">
+       <label for="filtro_tipo" class="visually-hidden">Tipo</label>
+       <select
+         class="form-select"
+         id="filtro_tipo"
+         name="filtro_tipo"
+      >
+         <option value="">Todos</option>
+         {% for t in tipo_opts %}
+           <option
+             value="{{ t }}"
+             {% if request.args.get('filtro_tipo') == t %}selected{% endif %}
+           >{{ t }}</option>
+         {% endfor %}
+       </select>
+     </div>
+     <div class="col-auto ms-auto">
+       <button type="submit" class="btn btn-primary">Filtrar</button>
+     </div>
+   </form>
+    <a href="{{ url_for('criterios.create_criterio_route', lic_id=lic_id) }}" class="btn btn-success mb3">Nuevo Criterio</a>
     <table class="table">
       <thead>
         <tr>
-          <th>Nombre</th><th>Peso</th><th>Tipo</th><th>Fórmula</th><th>Acciones</th>
+          <th>Nombre</th><th>Tipo</th><th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for c in criterios %}
         <tr>
           <td>{{ c.NombreCriterio }}</td>
-          <td>{{ c.Peso }}</td>
           <td>{{ c.TipoCriterio }}</td>
-          <td>{{ c.NombreFormula or '-' }}</td>
           <td>
             <a href="{{ url_for('criterios.edit_criterio_route', lic_id=lic_id, crit_id=c.id) }}" class="btn btn-sm btn-warning">Editar</a>
             <form method="post" action="{{ url_for('criterios.delete_criterio_route', lic_id=lic_id, crit_id=c.id) }}" style="display:inline">

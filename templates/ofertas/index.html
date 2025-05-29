@@ -2,6 +2,48 @@
 {% block content %}
 <div class="container">
   <h3>Ofertas{% if licitacion_id %} de Licitación {{ licitacion_id }}{% endif %}</h3>
+
+  <form method="get" class="row g-2 mb-3 align-items-end">
+    {%- if licitacion_id %}
+      <input type="hidden" name="licitacion_id" value="{{ licitacion_id }}">
+    {%- endif %}
+
+    <div class="col">
+      <label for="filtro_empresa" class="visually-hidden">Empresa</label>
+      <select class="form-select" id="filtro_empresa" name="filtro_empresa">
+        <option value="">Todas</option>
+        {% for emp in empresas %}
+          <option value="{{ emp }}"
+            {% if request.args.get('filtro_empresa') == emp %}selected{% endif %}>
+            {{ emp }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <label for="fecha_desde" class="visually-hidden">Desde</label>
+      <input type="date"
+             class="form-control"
+             id="fecha_desde"
+             name="fecha_desde"
+             value="{{ request.args.get('fecha_desde','') }}">
+    </div>
+
+    <div class="col-auto">
+      <label for="fecha_hasta" class="visually-hidden">Hasta</label>
+      <input type="date"
+             class="form-control"
+             id="fecha_hasta"
+             name="fecha_hasta"
+             value="{{ request.args.get('fecha_hasta','') }}">
+    </div>
+
+    <div class="col-auto ms-auto">
+      <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+  </form>
+
   <div class="mb-3">
     <a href="{{ url_for('ofertas.new', licitacion_id=licitacion_id, next=request.url) }}" class="btn btn-primary">Nueva Oferta</a>
   </div>

@@ -12,6 +12,7 @@ from services.licitacion_service import (
     list_evaluadores_logic, get_evaluadores_for_licitacion, assign_evaluadores
 )
 from services.stage_service import advance_stage, get_current_stage_name
+from datetime import datetime
 
 licitaciones_bp = Blueprint('licitaciones', __name__, url_prefix='/licitaciones')
 
@@ -26,6 +27,45 @@ def index():
     lic_rows = list_licitaciones(db)
     licitaciones = [l for l in lic_rows if l['user_id'] == user_id]
 
+       # ——— APLICAR FILTROS SEGÚN FORMULARIO ———
+    external_id  = request.args.get('external_id', '').strip()
+    title        = request.args.get('title', '').strip()
+    fecha_tipo   = request.args.get('fecha_tipo', '')
+    fecha_desde  = request.args.get('fecha_desde', '')
+    fecha_hasta  = request.args.get('fecha_hasta', '')
+
+    if external_id:
+       licitaciones = [
+           l for l in licitaciones
+           if external_id.lower() in (l['external_id'] or '').lower()
+       ]
+
+    if title:
+       licitaciones = [
+           l for l in licitaciones
+           if title.lower() in (l['title'] or '').lower()
+       ]
+
+    if fecha_tipo and fecha_desde and fecha_hasta:
+       try:
+           d_from = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+           d_to   = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+           def dentro(r):
+               val = r[fecha_tipo]
+               if not val:
+                   return False
+               # si viene como string “YYYY-MM-DD”
+               if isinstance(val, str):
+                   dt = datetime.strptime(val, '%Y-%m-%d').date()
+               else:
+                   # si ya es date o datetime
+                   dt = val if hasattr(val, 'day') else val.date()
+               return d_from <= dt <= d_to
+           licitaciones = [l for l in licitaciones if dentro(l)]
+       except ValueError:
+           # fechas mal formateadas: ignorar filtro
+           pass
+   
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config.get('LIC_PER_PAGE', 10)
     total = len(licitaciones)

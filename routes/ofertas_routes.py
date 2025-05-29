@@ -2,14 +2,61 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from services.oferta_service import list_ofertas_logic, get_oferta_logic, create_oferta_logic, edit_oferta_logic, remove_oferta_logic, evaluate_sobre1_logic
 from services.licitante_service import list_licitantes_logic
 import sqlite3
+from datetime import datetime
 
 ofertas_bp = Blueprint('ofertas', __name__, url_prefix='/ofertas')
 
 @ofertas_bp.route('/')
 def index():
-    lic_id = request.args.get('licitacion_id')
-    ofertas = list_ofertas_logic(current_app, lic_id)
-    return render_template('ofertas/index.html', ofertas=ofertas, licitacion_id=lic_id)
+    # Recuperar licitacion_id de la query string
+    licitacion_id = request.args.get('licitacion_id')
+
+    
+    # 1) Listado inicial de ofertas para esta licitación
+    all_ofertas = list_ofertas_logic(current_app, licitacion_id)
+    ofertas     = all_ofertas
+
+    # 2) Aplicar filtros en memoria
+    filtro_empresa = request.args.get('filtro_empresa', '').strip()
+    fecha_desde    = request.args.get('fecha_desde', '')
+    fecha_hasta    = request.args.get('fecha_hasta', '')
+
+    # Filtrar por nombre de empresa
+    if filtro_empresa:
+        ofertas = [
+            o for o in ofertas
+            if filtro_empresa.lower() in (o['nombreempresa'] or '').lower()
+        ]
+
+    # Filtrar por rango de fecha de presentación
+    if fecha_desde and fecha_hasta:
+        try:
+            d_from = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+            d_to   = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+            def in_range(o):
+                val = o['fechapresentacion']
+                if not val:
+                    return False
+                if isinstance(val, str):
+                    d = datetime.strptime(val, '%Y-%m-%d').date()
+                else:
+                    d = val if hasattr(val, 'day') else val.date()
+                return d_from <= d <= d_to
+            ofertas = [o for o in ofertas if in_range(o)]
+        except ValueError:
+            pass
+
+    # 3) Lista de empresas para el desplegable
+    empresas = sorted({o['nombreempresa'] for o in all_ofertas if o['nombreempresa']})
+
+    # 4) Renderizar con contexto de filtros
+    return render_template(
+        'ofertas/index.html',
+        ofertas=ofertas,
+        licitacion_id=licitacion_id,
+        empresas=empresas,
+        request=request
+    )
 
 @ofertas_bp.route('/new', methods=['GET', 'POST'])
 def new():

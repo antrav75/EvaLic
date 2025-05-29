@@ -10,12 +10,46 @@ licitantes_bp = Blueprint('licitantes', __name__, url_prefix='/licitantes')
 def index():
     # Recuperamos licitacion_id de query string
     licitacion_id = request.args.get('licitacion_id', type=int)
-    # Obtener todos los licitantes
-    lics = list_licitantes_logic(current_app)
-    # Renderizar plantilla con contexto
-    return render_template('licitantes/index.html',
-                           licitantes=lics,
-                           licitacion_id=licitacion_id)
+    # 1) Listado completo
+    all_licitantes = list_licitantes_logic(current_app)
+    lics = all_licitantes
+
+    # ——— Filtros “en memoria” ———
+    filtro_nombre    = request.args.get('filtro_nombre',   '').strip()
+    filtro_provincia = request.args.get('filtro_provincia','')
+    filtro_ciudad    = request.args.get('filtro_ciudad',   '')
+
+    if filtro_nombre:
+        lics = [
+            l for l in lics
+            if filtro_nombre.lower() in (l['nombreempresa'] or '').lower()
+        ]
+
+    if filtro_provincia:
+        lics = [
+            l for l in lics
+            if l['provincia'] == filtro_provincia
+        ]
+
+    if filtro_ciudad:
+        lics = [
+            l for l in lics
+            if filtro_ciudad.lower() in (l['ciudad'] or '').lower()
+        ]
+
+    # Listas para poblar los <select>
+    provincias = sorted({l['provincia'] for l in all_licitantes if l['provincia']})
+    ciudades   = sorted({l['ciudad']    for l in all_licitantes if l['ciudad']})
+
+    # 2) Renderizamos ya con filtros aplicados
+    return render_template(
+        'licitantes/index.html',
+        licitantes=lics,
+        licitacion_id=licitacion_id,
+        provincias=provincias,
+        ciudades=ciudades,
+        request=request
+    )
 
 @licitantes_bp.route('/new', methods=['GET', 'POST'])
 def new():
