@@ -7,27 +7,31 @@
   {% endfor %}
 {% endwith %}
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Titulo</th>
-      <th>Inicio</th>
-      <th>Fin</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for lic in licitaciones %}
-    <tr>
-      <td>{{ lic.title }}</td>
-      <td>{{ lic.fecha_inicio }}</td>
-      <td>{{ lic.fecha_fin }}</td>
-      <td>
-        <a href="#" class="btn btn-primary btn-sm">Evaluar</a>
-        <a href="#" class="btn btn-secondary btn-sm">Resultados</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="card mb-4">
+  <div class="card-body">
+    <table class="table">
+      <thead>
+        <tr>
+        <th>Titulo</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lic in licitaciones %}
+      <tr>
+        <td>{{ lic.title }}</td>
+        <td>{{ lic.fecha_inicio }}</td>
+        <td>{{ lic.fecha_fin }}</td>
+        <td>
+          <a href="{{ url_for('evaluador.evaluar', licitacion_id=lic.id) }}" class="btn btn-primary btn-sm">Evaluar</a>
+          <a href="#" class="btn btn-secondary btn-sm">Resultados</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

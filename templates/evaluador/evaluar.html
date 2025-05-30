@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Evaluar licitación: {{ lic.title }}</h1>
+
+<form method="post" action="">
+  <div class="card mb-4">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs" role="tablist">
+        {% for oferta in ofertas %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if loop.first %}active{% endif %}" id="tab-{{ oferta.licitante_id }}" data-bs-toggle="tab" data-bs-target="#oferta-{{ oferta.licitante_id }}" type="button" role="tab">
+            {{ oferta.nombreempresa }}
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card-body">
+      <div class="tab-content">
+        {% for oferta in ofertas %}
+        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="oferta-{{ oferta.licitante_id }}" role="tabpanel">
+          <h6 class="mt-2">Evaluación de criterios técnicos</h6>
+          <table class="table table-striped mt-3">
+            <thead>
+              <tr>
+                <th>Criterio</th>
+                <th>Puntuación</th>
+                <th>Peso</th>
+                <th>Total</th>
+                <th>Comentario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ev in oferta.criterios_evaluacion %}
+              <tr>
+                <td>{{ ev.nombre }}</td>
+                <td><input type="number" class="form-control" name="puntuacion_{{ oferta.licitante_id }}_{{ ev.id }}" value="{{ ev.puntuacion }}" min="0" max="100"></td>
+                <td>{{ ev.peso }}</td>
+                <td>{{ ev.total }}</td>
+                <td><input type="text" class="form-control" name="comentarios_{{ oferta.licitante_id }}_{{ ev.id }}" value="{{ ev.comentarios }}"></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card-footer text-end">
+      <a href="{{ url_for('evaluador.index') }}" class="btn btn-secondary me-2">Cancelar</a>
+      <button type="submit" class="btn btn-primary">Guardar evaluación</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

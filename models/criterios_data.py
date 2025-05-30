@@ -46,3 +46,11 @@ def list_tipo_criterios(db):
 
 def list_formulas(db):
     return db.execute("SELECT * FROM formulas").fetchall()
+
+def fetch_criterios_tecnicos(db, licitacion_id):
+    sql = """
+        SELECT *
+        FROM criterios
+        WHERE licitacion_id = ? AND tipocriterio_id = 2
+    """
+    return db.execute(sql, (licitacion_id,)).fetchall()

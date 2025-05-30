@@ -20,7 +20,23 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
-      <a class="navbar-brand" >EvaLic</a>
+
+      
+    {% if session.get('role_id') == 1 %}
+      {# Administrador → gestión de usuarios #}
+      <a class="navbar-brand" href="{{ url_for('user.dashboard') }}">EvaLic</a>
+    {% elif session.get('role_id') == 2 %}
+      {# Responsable → licitaciones que le corresponden #}
+      <a class="navbar-brand" href="{{ url_for('licitaciones.index') }}">EvaLic</a>
+    {% elif session.get('role_id') == 3 %}
+      {# Evaluador → sus licitaciones asignadas #}
+      <a class="navbar-brand" href="{{ url_for('evaluador.index') }}">EvaLic</a>
+    {% else %}
+      {# Usuario no logueado o rol desconocido → login #}
+      <a class="navbar-brand" href="{{ url_for('auth.login') }}">EvaLic</a>
+    {% endif %}
+
+
       {% if session.get('username') %}
       <div class="ms-auto d-flex align-items-center">
         <span class="navbar-text me-3">{{ session['username'] }}</span>

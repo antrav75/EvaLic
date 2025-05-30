@@ -96,13 +96,15 @@ def init_db(app):
     );
 
       CREATE TABLE IF NOT EXISTS evaluaciones (
-        id  INTEGER PRIMARY KEY AUTOINCREMENT,
         puntuacion INTEGER,
         comentarios TEXT,
         fechaevaluacion TEXT ,
+        licitacion_id INTEGER NOT NULL,             
         usuario_id INTEGER NOT NULL,
         oferta_id INTEGER NOT NULL,
-        criterio_id INTEGER,                          
+        criterio_id INTEGER,
+        PRIMARY KEY (licitacion_id, usuario_id, oferta_id, criterio_id)
+        FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id)                                       
         FOREIGN KEY (usuario_id) REFERENCES users(id)
         FOREIGN KEY (oferta_id) REFERENCES ofertas(id)
         FOREIGN KEY (criterio_id) REFERENCES criterio(id)                                                             
