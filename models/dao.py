@@ -132,11 +132,26 @@ def init_db(app):
     );
 
       CREATE TABLE IF NOT EXISTS licitaciones_evaluadores (
-        licitacion_id,
-        usuario_id,
+        licitacion_id INTEGER NOT NULL,
+        usuario_id INTEGER NOT NULL,
         PRIMARY KEY (licitacion_id,usuario_id)
         FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id)
         FOREIGN KEY (usuario_id) REFERENCES users(id)
+    );
+                     
+      CREATE TABLE IF NOT EXISTS resultados (
+        puntuacionponderada INTEGER NOT NULL,
+        ofertaAB INTEGER NOT NULL,
+        fechaResultado TEXT NOT NULL,
+        licitacion_id INTEGER NOT NULL,
+        usuario_id INTEGER NOT NULL,
+        oferta_id INTEGER NOT NULL,
+        criterio_id INTEGER NOT NULL,
+        PRIMARY KEY (licitacion_id, usuario_id, oferta_id,criterio_id)
+        FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id)
+        FOREIGN KEY (usuario_id) REFERENCES users(id)
+        FOREIGN KEY (oferta_id) REFERENCES ofertas(id)
+        FOREIGN KEY (criterio_id) REFERENCES criterios(id)             
     );
                                                                                                                    
     """)
