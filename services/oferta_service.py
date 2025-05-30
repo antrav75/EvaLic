@@ -1,6 +1,7 @@
 from models.ofertas_data import list_ofertas, get_oferta, create_oferta, edit_oferta, remove_oferta
 from models.dao import get_db
 from models.dao import list_ofertas_by_licitacion, update_admitidasobre1
+from models.ofertas_data import fetch_ofertas_by_licitacion
 
 def list_ofertas_logic(app, licitacion_id=None):
     db = get_db(app)
@@ -33,3 +34,9 @@ def evaluate_sobre1_logic(app, licitacion_id, evaluaciones):
     for licitante_id, admitido in evaluaciones.items():
         val = 1 if admitido else 0
         update_admitidasobre1(app, licitacion_id, licitante_id, val)
+
+def listar_ofertas_por_licitacion(app, licitacion_id):
+    """Devuelve lista de ofertas con nombre de licitante"""
+    db = get_db(app)
+    rows = fetch_ofertas_by_licitacion(db, licitacion_id)
+    return [dict(r) for r in rows]

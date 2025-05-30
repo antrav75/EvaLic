@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>INFORME DE RESULTADOS</h2>
+  <h4 class="mt-3">1. Informe técnico (Sobre2)</h4>
+
+  <p><strong>Evaluadores:</strong>
+    {% for ev in evaluadores %}
+      {{ ev.username }}{% if not loop.last %}, {% endif %}
+    {% endfor %}
+  </p>
+
+  <table class="table table-bordered mt-3">
+    <thead>
+      <tr>
+        <th>Criterio Técnico</th>
+        {% for oferta in ofertas %}
+          <th>{{ oferta.nombreempresa }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% set criterios = informe|map(attribute='criterio_id')|unique %}
+      {% for criterio in criterios %}
+      <tr>
+        {% set nombre = (informe|selectattr('criterio_id','equalto',criterio)|map(attribute='criterio_nombre')|first) %}
+        <td>{{ nombre }}</td>
+        {% for oferta in ofertas %}
+          {% set valor = (informe
+            |selectattr('criterio_id','equalto',criterio)
+            |selectattr('oferta_id','equalto',oferta.licitante_id)
+            |map(attribute='avg_ponderado')
+            |first) %}
+          <td>{{ valor or 0 }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('evaluador.index') }}" class="btn btn-secondary">Volver</a>
+</div>
+{% endblock %}

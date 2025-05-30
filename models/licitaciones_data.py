@@ -29,3 +29,14 @@ def edit_licitacion(db, lic_id, external_id, title, description, fecha_inicio, f
 def remove_licitacion(db, lic_id):
     db.execute("DELETE FROM licitaciones WHERE id=?", (lic_id,))
     db.commit()
+
+
+def fetch_licitacion_by_id(db, licitacion_id):
+    """Devuelve una fila de la licitación según su ID"""
+    sql = """
+        SELECT *
+        FROM licitaciones
+        WHERE id = ?
+    """
+    return db.execute(sql, (licitacion_id,)).fetchone()
+

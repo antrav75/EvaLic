@@ -8,6 +8,8 @@ from models.licitaciones_data import (
 )
 from models.stage_data import create_stage, delete_stages_by_tender
 from services.stage_service import get_current_stage_name
+from models.licitaciones_data import fetch_licitacion_by_id
+from models.dao import get_db
 
 def list_licitaciones(db):
     return data_list(db)
@@ -63,3 +65,9 @@ def get_evaluadores_for_licitacion(db, lic_id):
 
 def assign_evaluadores(db, lic_id, user_ids):
     return _assign_evaluadores(db, lic_id, user_ids)
+
+def obtener_licitacion_por_id(app, licitacion_id):
+    """Devuelve la licitación como dict"""
+    db = get_db(app)
+    row = fetch_licitacion_by_id(db, licitacion_id)
+    return dict(row) if row else None

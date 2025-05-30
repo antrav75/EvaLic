@@ -43,3 +43,14 @@ def edit_oferta(db, licitacion_id, licitante_id_old, new_licitante_id, fechapres
 def remove_oferta(db, licitacion_id, licitante_id):
     db.execute("DELETE FROM ofertas WHERE licitacion_id=? AND licitante_id=?", (licitacion_id, licitante_id))
     db.commit()
+
+def fetch_ofertas_by_licitacion(db, licitacion_id):
+    """Devuelve todas las ofertas de una licitación con nombre de empresa"""
+    sql = """
+        SELECT o.*, e.nombreempresa AS nombre_licitante
+        FROM ofertas o
+        JOIN licitantes e ON o.licitante_id = e.id
+        WHERE o.licitacion_id = ?
+    """
+    return db.execute(sql, (licitacion_id,)).fetchall()
+
