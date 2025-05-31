@@ -18,6 +18,9 @@ def login():
                 'username': user['username'],
                 'role_id': user['role_id']
             })
+
+            session.permanent = True # Mantener la sesión activa
+
             if user['role_id'] == 1:
                 return redirect(url_for('user.dashboard'))  # Administrador
             elif user['role_id'] == 2:

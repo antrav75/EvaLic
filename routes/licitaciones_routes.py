@@ -5,7 +5,8 @@ from flask import (
     url_for, flash, session, current_app, abort
 )
 from math import ceil
-from models.dao import get_db, get_role_id
+from models.dao import get_db, get_role_id, get_formulas, guardar_evaluacion_economica
+
 from services.licitacion_service import (
     list_licitaciones, get_licitacion, create_licitacion,
     edit_licitacion, remove_licitacion,
@@ -13,6 +14,15 @@ from services.licitacion_service import (
 )
 from services.stage_service import advance_stage, get_current_stage_name
 from datetime import datetime
+
+from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
+from services.criterio_service import listar_economicos
+from services.resultados_service import generar_informe_tecnico
+from services.licitacion_service import obtener_licitacion_por_id
+from services.oferta_service import listar_ofertas_por_licitacion
+
+from services.oferta_service import list_ofertas_logic, evaluate_sobre1_logic
+from services.licitacion_service import get_licitacion as get_licitacion_logic
 
 licitaciones_bp = Blueprint('licitaciones', __name__, url_prefix='/licitaciones')
 
@@ -208,3 +218,73 @@ def evaluadores_licitacion(lic_id):
     except Exception as e:
         flash(str(e), 'error')
     return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=lic_id))
+
+@licitaciones_bp.route('/<int:licitacion_id>/evaluar_sobre3', methods=['GET', 'POST'])
+def evaluar_sobre3(licitacion_id):
+    # Autenticación y contexto
+    if 'user_id' not in session or session.get('role_id') != 2:
+        return redirect(url_for('auth.login'))
+
+    usuario_id = session['user_id']
+    db = get_db(current_app)
+
+    # POST: guardar o actualizar evaluaciones
+    if request.method == 'POST' and request.form:
+        ofertas = list_ofertas_logic(current_app, licitacion_id)
+        criterios = listar_economicos(current_app, licitacion_id)
+        for oferta in ofertas:
+            lid = oferta['licitante_id']
+            for c in criterios:
+                cid = c['id']
+                puntuacion = request.form.get(f'puntuacion_{lid}_{cid}')
+                formula_id = request.form.get(f'formula_{lid}_{cid}')
+                comentarios = request.form.get(f'comentarios_{lid}_{cid}', '')
+                guardar_evaluacion_economica(
+                    current_app,
+                    licitacion_id,
+                    lid,
+                    cid,
+                    puntuacion,
+                    formula_id,
+                    comentarios,
+                    session.get('user_id')
+                )
+        flash('Evaluación guardada con éxito', 'success')
+        return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=licitacion_id))
+
+    
+   
+    # GET: preparar datos para la vista
+    lic = get_licitacion_logic(db, licitacion_id)
+    # Convertir filas a dicts para permitir asignaciones
+    raw_ofertas = list_ofertas_logic(current_app, licitacion_id)
+    ofertas = [dict(of) for of in raw_ofertas]
+    # Filtrar criterios técnicos
+    criterios = listar_economicos(current_app, licitacion_id)
+    evaluaciones = obtener_evaluaciones(current_app, licitacion_id, usuario_id)
+
+    # Mapa de evaluaciones existentes
+    eval_map = {
+        (e['licitante_id'], e['criterio_id']): e
+        for e in evaluaciones
+    }
+
+    # Construir lista de criterios por oferta
+    for oferta in ofertas:
+        lista = []
+        for c in criterios:
+            key = (oferta['licitante_id'], c['id'])
+            e = eval_map.get(key)
+            score = e['puntuacion'] if e else 0
+            lista.append({
+                'id': c['id'],
+                'nombre': c['NombreCriterio'],
+                'puntuacion': e['puntuacion'] if e else '', 
+                'preciobase': c['preciobase'],
+                'formula_id': e['formula_id'] if e else '',
+                'comentarios': e['comentarios'] if e else '',
+            })
+        oferta['criterios_evaluacion'] = lista
+
+    formulas = get_formulas(current_app)
+    return render_template('licitaciones/evaluar_sobre3.html', lic=lic, ofertas=ofertas, formulas=formulas)

@@ -64,14 +64,18 @@
   <a href="{{ url_for('ofertas.index', licitacion_id=lic.id) }}" class="btn btn-info ms-2 disabled">Ofertas</a>
 {% endif %}
 
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#avanzarEstadoModal">Avanzar estado</button>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#avanzarEstadoModal">Avanzar</button>
       
       
       {% if current_stage == 'Sobre1' %}
-  <a href="{{ url_for('ofertas.evaluar_sobre1', licitacion_id=lic.id) }}" class="btn btn-success ms-2">Evaluar</a>
+  <a href="{{ url_for('ofertas.evaluar_sobre1', licitacion_id=lic.id) }}" class="btn btn-success ms-2">Sobre1</a>
 {% else %}
-  <a href="#" class="btn btn-success ms-2 disabled" tabindex="-1" aria-disabled="true">Evaluar</a>
+  <a href="#" class="btn btn-success ms-2 disabled" tabindex="-1" aria-disabled="true">Sobre1</a>
 {% endif %}
+
+<a href="{{ url_for('licitaciones.evaluar_sobre3', licitacion_id=lic.id) }}" class="btn btn-warning">
+    Sobre 3
+</a>
     </form>
 
     <!-- Modal Avanzar Estado -->

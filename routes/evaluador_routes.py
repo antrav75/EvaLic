@@ -37,18 +37,18 @@ def evaluar(licitacion_id):
         # Filtrar solo criterios técnicos
         criterios = listar_tecnicos(current_app, licitacion_id)
         for oferta in ofertas:
-            oferta_id = oferta['licitante_id']
+            licitante_id = oferta['licitante_id']
             for c in criterios:
                 crit_id = c['id']
-                puntuacion = request.form.get(f'puntuacion_{oferta_id}_{crit_id}', 0)
-                comentarios = request.form.get(f'comentarios_{oferta_id}_{crit_id}', '').strip()
+                puntuacion = request.form.get(f'puntuacion_{licitante_id}_{crit_id}', 0)
+                comentarios = request.form.get(f'comentarios_{licitante_id}_{crit_id}', '').strip()
 
                 # y la guardamos en la BD
                 guardar_evaluacion(
                     current_app,
                     licitacion_id,
                     usuario_id,
-                    oferta_id,
+                    licitante_id,
                     crit_id,
                     puntuacion,  
                     comentarios
@@ -68,7 +68,7 @@ def evaluar(licitacion_id):
 
     # Mapa de evaluaciones existentes
     eval_map = {
-        (e['oferta_id'], e['criterio_id']): e
+        (e['licitante_id'], e['criterio_id']): e
         for e in evaluaciones
     }
 

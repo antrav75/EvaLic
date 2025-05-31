@@ -16,11 +16,11 @@ def insert_resultados_tecnicos(db, licitacion_id):
     # Inserta nuevos resultados
     sql = """
         INSERT INTO resultados
-        (licitacion_id, usuario_id, oferta_id, criterio_id, puntuacionponderada, ofertaAB, fecharesultado)
+        (licitacion_id, usuario_id, licitante_id, criterio_id, puntuacionponderada, ofertaAB, fecharesultado)
         SELECT
             e.licitacion_id,
             e.usuario_id,
-            e.oferta_id,
+            e.licitante_id,
             e.criterio_id,
             e.puntuacion * c.peso AS puntuacionponderada,
             0 AS ofertaAB,
@@ -38,11 +38,11 @@ def fetch_informe_tecnico(db, licitacion_id):
         SELECT
             c.id AS criterio_id,
             c.NombreCriterio AS criterio_nombre,
-            o.licitante_id AS oferta_id,
+            o.licitante_id AS licitante_id,
             AVG(r.puntuacionponderada) AS avg_ponderado
         FROM resultados r
         JOIN criterios c ON r.criterio_id = c.id
-        JOIN ofertas o ON r.oferta_id = o.licitante_id AND o.licitacion_id = ?
+        JOIN ofertas o ON r.licitante_id = o.licitante_id AND o.licitacion_id = ?
         WHERE r.licitacion_id = ?
         GROUP BY c.id, o.licitante_id
         ORDER BY c.id, avg_ponderado DESC

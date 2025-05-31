@@ -28,7 +28,7 @@
         {% for oferta in ofertas %}
           {% set valor = (informe
             |selectattr('criterio_id','equalto',criterio)
-            |selectattr('oferta_id','equalto',oferta.licitante_id)
+            |selectattr('licitante_id','equalto',oferta.licitante_id)
             |map(attribute='avg_ponderado')
             |first) %}
           <td>{{ valor or 0 }}</td>

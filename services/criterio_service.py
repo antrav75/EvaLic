@@ -3,7 +3,7 @@ from models.criterios_data import (
     edit_criterio, delete_criterio,
     list_tipo_criterios, list_formulas
 )
-from models.criterios_data import fetch_criterios_tecnicos
+from models.criterios_data import fetch_criterios_tecnicos, fetch_criterios_economicos
 from models.dao import get_db
 
 def listar(db, lic_id):
@@ -62,3 +62,7 @@ def formulas(db):
 def listar_tecnicos(app, licitacion_id):
     db = get_db(app)
     return fetch_criterios_tecnicos(db, licitacion_id)
+
+def listar_economicos(app, licitacion_id):
+    db = get_db(app)
+    return fetch_criterios_economicos(db, licitacion_id)

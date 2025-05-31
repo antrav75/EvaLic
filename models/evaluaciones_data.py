@@ -1,3 +1,5 @@
+from datetime import datetime
+
 def fetch_licitaciones_by_evaluator(db, evaluator_id):
     sql = '''
         SELECT l.id, l.external_id, l.title, l.description, l.fecha_inicio, l.fecha_adjudicacion
@@ -11,19 +13,20 @@ def fetch_licitaciones_by_evaluator(db, evaluator_id):
 
 def fetch_evaluaciones(db, licitacion_id, usuario_id):
     sql = """
-        SELECT oferta_id, criterio_id, puntuacion, comentarios
-        FROM evaluaciones
-        WHERE licitacion_id=? AND usuario_id=?
+        SELECT e.licitacion_id,e.usuario_id,e.licitante_id, e.criterio_id, e.puntuacion, e.formula_id, c.preciobase, e.fechaevaluacion, e.comentarios
+        FROM evaluaciones e JOIN criterios c ON e.criterio_id = c.id
+        WHERE e.licitacion_id=? AND usuario_id=?
     """
     return db.execute(sql, (licitacion_id, usuario_id)).fetchall()
 
 
-def save_evaluacion(db, licitacion_id, usuario_id, oferta_id, criterio_id, puntuacion, comentarios):
+def save_evaluacion(db, licitacion_id, usuario_id, licitante_id, criterio_id, puntuacion, comentarios):
     db.execute(
         """
         INSERT OR REPLACE INTO evaluaciones
-        (licitacion_id, usuario_id, oferta_id, criterio_id, puntuacion, comentarios, fechaevaluacion)
-        VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-        """, (licitacion_id, usuario_id, oferta_id, criterio_id, puntuacion, comentarios)
+        (licitacion_id, usuario_id, licitante_id, criterio_id, formula_id, puntuacion,comentarios, fechaevaluacion)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (licitacion_id, usuario_id, licitante_id, criterio_id,None, puntuacion, comentarios,datetime.now())
     )
     db.commit()
+

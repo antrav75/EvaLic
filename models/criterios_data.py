@@ -54,3 +54,11 @@ def fetch_criterios_tecnicos(db, licitacion_id):
         WHERE licitacion_id = ? AND tipocriterio_id = 2
     """
     return db.execute(sql, (licitacion_id,)).fetchall()
+
+def fetch_criterios_economicos(db, licitacion_id):
+    sql = """
+        SELECT *
+        FROM criterios
+        WHERE licitacion_id = ? AND tipocriterio_id = 3
+    """
+    return db.execute(sql, (licitacion_id,)).fetchall()

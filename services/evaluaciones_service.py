@@ -13,6 +13,6 @@ def obtener_evaluaciones(app, licitacion_id, usuario_id):
     return fetch_evaluaciones(db, licitacion_id, usuario_id)
 
 
-def guardar_evaluacion(app, licitacion_id, usuario_id, oferta_id, criterio_id, puntuacion, comentarios):
+def guardar_evaluacion(app, licitacion_id, usuario_id, licitante_id, criterio_id, puntuacion, comentarios):
     db = get_db(app)
-    save_evaluacion(db, licitacion_id, usuario_id, oferta_id, criterio_id, puntuacion, comentarios)
+    save_evaluacion(db, licitacion_id, usuario_id, licitante_id, criterio_id, puntuacion, comentarios)

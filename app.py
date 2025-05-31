@@ -8,10 +8,11 @@ from routes.ofertas_routes import ofertas_bp
 from routes.licitantes_routes import licitantes_bp
 from routes.evaluador_routes import evaluador_bp
 from routes.criterios_routes import criterios_bp
+from datetime import timedelta
 
 def create_app():
     app = Flask(__name__)
-
+    app.permanent_session_lifetime = timedelta(hours=1)  # Sesión permanente por 1 hora
 
     app.config.from_object(Config)
 
@@ -38,6 +39,7 @@ def create_app():
     app.register_blueprint(licitantes_bp)
     app.register_blueprint(evaluador_bp)
     app.register_blueprint(criterios_bp)
+
 
     return app
 

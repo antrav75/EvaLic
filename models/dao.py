@@ -3,6 +3,7 @@ import sqlite3
 from flask import g
 from werkzeug.security import generate_password_hash, check_password_hash
 import math
+from datetime import datetime
 
 def get_db(app):
     db = getattr(g, '_database', None)
@@ -97,17 +98,19 @@ def init_db(app):
 
       CREATE TABLE IF NOT EXISTS evaluaciones (
         puntuacion INTEGER,
+        formula_id INTEGER,                          
         comentarios TEXT,
         fechaevaluacion TEXT ,
         licitacion_id INTEGER NOT NULL,             
         usuario_id INTEGER NOT NULL,
-        oferta_id INTEGER NOT NULL,
+        licitante_id INTEGER NOT NULL,
         criterio_id INTEGER,
-        PRIMARY KEY (licitacion_id, usuario_id, oferta_id, criterio_id)
+        PRIMARY KEY (licitacion_id, usuario_id, licitante_id, criterio_id)
         FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id)                                       
         FOREIGN KEY (usuario_id) REFERENCES users(id)
-        FOREIGN KEY (oferta_id) REFERENCES ofertas(id)
-        FOREIGN KEY (criterio_id) REFERENCES criterio(id)                                                             
+        FOREIGN KEY (licitante_id) REFERENCES licitantes(id)
+        FOREIGN KEY (criterio_id) REFERENCES criterio(id)
+        FOREIGN KEY (formula_id) REFERENCES formulas(id)                                                                          
     );   
 
       CREATE TABLE IF NOT EXISTS ofertas (
@@ -145,12 +148,12 @@ def init_db(app):
         fechaResultado TEXT NOT NULL,
         licitacion_id INTEGER NOT NULL,
         usuario_id INTEGER NOT NULL,
-        oferta_id INTEGER NOT NULL,
+        licitante_id INTEGER NOT NULL,
         criterio_id INTEGER NOT NULL,
-        PRIMARY KEY (licitacion_id, usuario_id, oferta_id,criterio_id)
+        PRIMARY KEY (licitacion_id, usuario_id, licitante_id,criterio_id)
         FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id)
         FOREIGN KEY (usuario_id) REFERENCES users(id)
-        FOREIGN KEY (oferta_id) REFERENCES ofertas(id)
+        FOREIGN KEY (licitante_id) REFERENCES licitantes(id)
         FOREIGN KEY (criterio_id) REFERENCES criterios(id)             
     );
                                                                                                                    
@@ -295,4 +298,36 @@ def update_admitidasobre1(app, licitacion_id, licitante_id, admitido):
         "UPDATE ofertas SET admitidasobre1 = ? WHERE licitacion_id = ? AND licitante_id = ?",
         (admitido, licitacion_id, licitante_id)
     )
+    db.commit()
+
+def get_formulas(app):
+    conn = get_db(app)
+    return conn.execute("SELECT id,NombreFormula FROM formulas").fetchall()
+
+def guardar_evaluacion_economica(app, licitacion_id, licitante_id, criterio_id, puntuacion, formula_id, comentarios, usuario_id):
+    db = get_db(app)
+    cur = db.cursor()
+
+    cur.execute("""
+        SELECT 1 FROM evaluaciones
+        WHERE licitacion_id = ? AND licitante_id = ? AND criterio_id = ?
+    """, (licitacion_id, licitante_id, criterio_id))
+
+    exists = cur.fetchone()
+
+    if exists:
+        cur.execute("""
+            UPDATE evaluaciones
+            SET puntuacion = ?, formula_id = ?, comentarios = ?, usuario_id = ?
+            WHERE licitacion_id = ? AND licitante_id = ? AND criterio_id = ? 
+        """, (puntuacion, formula_id, comentarios, usuario_id,
+              licitacion_id, licitante_id, criterio_id))
+    else:
+        cur.execute("""
+            INSERT INTO evaluaciones (
+                licitacion_id, licitante_id, criterio_id,
+                puntuacion, formula_id, comentarios, usuario_id, fechaevaluacion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (licitacion_id, licitante_id, criterio_id, puntuacion, formula_id, comentarios, usuario_id, datetime.now()))
+
     db.commit()
