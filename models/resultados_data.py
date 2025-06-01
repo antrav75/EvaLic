@@ -32,7 +32,8 @@ def insert_resultados_tecnicos(db, licitacion_id):
     db.execute(sql, (licitacion_id,))
     db.commit()
 
-def fetch_informe_tecnico(db, licitacion_id):
+
+def fetch_informe(db, licitacion_id):
     """Devuelve la media ponderada por criterio y oferta"""
     sql = """
         SELECT

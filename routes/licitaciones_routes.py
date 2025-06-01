@@ -17,7 +17,7 @@ from datetime import datetime
 
 from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
 from services.criterio_service import listar_economicos
-from services.resultados_service import generar_informe_tecnico
+from services.resultados_service import generar_informe
 from services.licitacion_service import obtener_licitacion_por_id
 
 from services.oferta_service import list_ofertas_admitidas_logic, evaluate_sobre1_logic

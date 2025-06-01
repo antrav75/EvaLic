@@ -26,7 +26,7 @@
         <td>{{ lic.fecha_fin }}</td>
         <td>
           <a href="{{ url_for('evaluador.evaluar', licitacion_id=lic.id) }}" class="btn btn-primary btn-sm">Evaluar</a>
-          <a href="{{ url_for('evaluador.informe_tecnico', licitacion_id=lic.id) }}" class="btn btn-secondary btn-sm">Resultados</a>
+          <a href="{{ url_for('evaluador.informe', licitacion_id=lic.id) }}" class="btn btn-secondary btn-sm">Resultados</a>
         </td>
       </tr>
       {% endfor %}

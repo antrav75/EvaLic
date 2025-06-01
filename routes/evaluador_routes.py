@@ -6,7 +6,7 @@ from models.dao import get_db
 
 from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
 from services.criterio_service import listar_tecnicos
-from services.resultados_service import generar_informe_tecnico
+from services.resultados_service import generar_informe
 from services.licitacion_service import obtener_licitacion_por_id
 
 evaluador_bp = Blueprint('evaluador', __name__, url_prefix='/evaluador')
@@ -90,8 +90,8 @@ def evaluar(licitacion_id):
 
     return render_template('evaluador/evaluar.html', lic=lic, ofertas=ofertas)
 
-@evaluador_bp.route('/<int:licitacion_id>/informe_tecnico', methods=['GET'])
-def informe_tecnico(licitacion_id):
+@evaluador_bp.route('/<int:licitacion_id>/informe', methods=['GET'])
+def informe(licitacion_id):
     if 'user_id' not in session or session.get('role_id') != 3:
         return redirect(url_for('auth.login'))
 
@@ -99,13 +99,13 @@ def informe_tecnico(licitacion_id):
     # Obtener datos de licitación (ajusta a tu propia función)
     lic = obtener_licitacion_por_id(db, licitacion_id)
     # Generar y obtener datos del informe (siempre sobrescribe previos)
-    informe, evaluadores = generar_informe_tecnico(current_app, licitacion_id)
+    informe, evaluadores = generar_informe(current_app, licitacion_id)
     # Obtener ofertas para encabezados de columna
     raw_ofertas = list_ofertas_admitidas_logic(db, licitacion_id)  # ajusta a tu función
     ofertas = [dict(of) for of in raw_ofertas]
 
     return render_template(
-        'evaluador/informe_tecnico.html',
+        'evaluador/informe.html',
         lic=lic,
         informe=informe,
         evaluadores=evaluadores,
