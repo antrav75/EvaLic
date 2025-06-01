@@ -108,7 +108,7 @@ def informe(licitacion_id):
     lic = obtener_licitacion_por_id(db, licitacion_id)
 
     # 2) Generar resultados técnicos + económicos
-    informe_rows, evaluadores = generar_informe(current_app, licitacion_id)
+    informe_rows, evaluadores, totals = generar_informe(current_app, licitacion_id)
 
     # 3) Solo licitantes que participaron
     raw_ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
@@ -141,5 +141,6 @@ def informe(licitacion_id):
         evaluadores=evaluadores,
         ofertas=ofertas,
         criterios_tecnicos=criterios_tecnicos,
-        criterios_economicos=criterios_economicos
+        criterios_economicos=criterios_economicos,
+        totals=totals,
     )

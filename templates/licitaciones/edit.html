@@ -42,44 +42,43 @@
         <input type="date" class="form-control" id="fecha_adjudicacion" name="fecha_adjudicacion" value="{{ lic.fecha_adjudicacion }}">
       </div>
 
-      <button type="submit" class="btn btn-warning">Actualizar</button>
+      <button type="submit" class="btn btn-primary">Guardar</button>
 
-      <a href="{{ url_for('licitaciones.index') }}" class="btn btn-secondary">Cancelar</a>
+      <a href="{{ url_for('licitaciones.index') }}" class="btn btn-warning">Cancelar</a>
 
       {% if current_stage == 'Borrador' %}
-  <a href="{{ url_for('criterios.index', lic_id=lic.id) }}" class="btn btn-info ms-2">Criterios</a>
-{% else %}
-  <a href="#" class="btn btn-secondary ms-2 disabled" tabindex="-1" aria-disabled="true">Criterios</a>
-{% endif %}
+        <a href="{{ url_for('criterios.index', lic_id=lic.id) }}" class="btn btn-info ms-2">Criterios</a>
+      {% else %}
+        <a href="#" class="btn btn-secondary ms-2 disabled" tabindex="-1" aria-disabled="true">Criterios</a>
+      {% endif %}
 
       {% if current_stage == 'Borrador' or current_stage == 'Iniciada' %}
-  <button type="button" class="btn btn-secondary ms-2" data-bs-toggle="modal" data-bs-target="#evaluadoresModal">Evaluadores</button>
-{% else %}
-  <button type="button" class="btn btn-secondary ms-2 disabled" data-bs-toggle="modal" data-bs-target="#evaluadoresModal">Evaluadores</button>
-{% endif %}
+        <button type="button" class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#evaluadoresModal">Evaluadores</button>
+      {% else %}
+        <button type="button" class="btn btn-secondary ms-2 disabled" data-bs-toggle="modal" data-bs-target="#evaluadoresModal">Evaluadores</button>
+      {% endif %}
 
       {% if current_stage == 'Iniciada' %}
-  <a href="{{ url_for('ofertas.index', licitacion_id=lic.id) }}" class="btn btn-info ms-2">Ofertas</a>
-{% else %}
-  <a href="{{ url_for('ofertas.index', licitacion_id=lic.id) }}" class="btn btn-info ms-2 disabled">Ofertas</a>
-{% endif %}
+        <a href="{{ url_for('ofertas.index', licitacion_id=lic.id) }}" class="btn btn-info ms-2">Ofertas</a>
+      {% else %}
+        <a href="#" class="btn btn-secondary ms-2 disabled">Ofertas</a>
+      {% endif %}
 
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#avanzarEstadoModal">Avanzar</button>
       
-      
       {% if current_stage == 'Sobre1' %}
-  <a href="{{ url_for('ofertas.evaluar_sobre1', licitacion_id=lic.id) }}" class="btn btn-success ms-2">Sobre1</a>
-{% else %}
-  <a href="#" class="btn btn-success ms-2 disabled" tabindex="-1" aria-disabled="true">Sobre1</a>
-{% endif %}
+        <a href="{{ url_for('ofertas.evaluar_sobre1', licitacion_id=lic.id) }}" class="btn btn-success ms-2">Sobre1</a>
+      {% else %}
+        <a href="#" class="btn btn-secondary ms-2 disabled" tabindex="-1" aria-disabled="true">Sobre1</a>
+      {% endif %}
 
-<a href="{{ url_for('licitaciones.evaluar_sobre3', licitacion_id=lic.id) }}" class="btn btn-warning">
-    Sobre 3
-</a>
+      {% if current_stage == 'Sobre3' %}
+        <a href="{{ url_for('licitaciones.evaluar_sobre3', licitacion_id=lic.id) }}" class="btn btn-warning">Sobre 3</a>
+      {% else %}  
+        <a href="#" class="btn btn-secondary ms-2 disabled" tabindex="-1" aria-disabled="true">Sobre3</a>
+      {% endif %}  
 
-<a href="{{ url_for('evaluador.informe', licitacion_id=lic.id) }}" class="btn btn-info">
-    Resultados
-</a>
+    <a href="{{ url_for('evaluador.informe', licitacion_id=lic.id) }}" class="btn btn-info">Resultados</a>
     </form>
 
     <!-- Modal Avanzar Estado -->
