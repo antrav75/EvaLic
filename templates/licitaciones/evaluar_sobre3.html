@@ -1,61 +1,133 @@
 {% extends 'base.html' %}
-{% block content %}
-  <h1>Evaluar licitación: {{ lic.title }}</h1>
+{% block title %}Evaluar Sobre 3 – {{ lic.NombreLicitacion }}{% endblock %}
 
-<form method="post" action="">
-  <div class="card mb-4">
-    <div class="card-header">
-      <ul class="nav nav-tabs card-header-tabs" role="tablist">
-        {% for oferta in ofertas %}
-        <li class="nav-item" role="presentation">
-          <button class="nav-link {% if loop.first %}active{% endif %}" id="tab-{{ oferta.licitante_id }}" data-bs-toggle="tab" data-bs-target="#oferta-{{ oferta.licitante_id }}" type="button" role="tab">
-            {{ oferta.nombreempresa }}
-          </button>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-    <div class="card-body">
-      <div class="tab-content">
-        {% for oferta in ofertas %}
-        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="oferta-{{ oferta.licitante_id }}" role="tabpanel">
-          <h6 class="mt-2">Evaluación de criterios económicos</h6>
-          <table class="table table-striped mt-3">
-            <thead>
-              <tr>
-              <th>Criterio</th>
-              <th>Oferta (€)</th>
-              <th>Precio base (€)</th>
-              <th>Fórmula</th>
-              <th>Comentario</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for ev in oferta.criterios_evaluacion %}
-              <tr>
-                <td>{{ ev.nombre }}</td>
-                <td><input type="number" class="form-control" name="puntuacion_{{ oferta.licitante_id }}_{{ ev.id }}" value="{{ ev.puntuacion }}" min="0"></td>                
-                <td><input class="form-control" type="number" value="{{ ev.preciobase }}" readonly/></td>
-                <td>
-                  <select name="formula_{{ oferta.licitante_id }}_{{ ev.id }}" class="form-control">
-                  {% for formula in formulas %}
-                    <option value="{{ formula.id }}" {% if ev.formula_id == formula.id %}selected{% endif %}>{{ formula.NombreFormula }}</option>
-                  {% endfor %}
-                  </select>
-              </td>
-              <td><input type="text" class="form-control" name="comentarios_{{ oferta.licitante_id }}_{{ ev.id }}" value="{{ ev.comentarios }}"></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+{% block content %}
+<div class="container mt-4">
+  <h2>Evaluación Económica: {{ lic.NombreLicitacion }}</h2>
+
+  <form method="post">
+    <div class="card mb-4">
+      <div class="card-header">
+        <!-- Nav-tabs: una pestaña por empresa/oferta -->
+        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+          {% for oferta in ofertas %}
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link {% if loop.first %}active{% endif %}"
+                id="tab-empresa-{{ oferta.licitante_id }}"
+                data-bs-toggle="tab"
+                data-bs-target="#empresa-{{ oferta.licitante_id }}"
+                type="button"
+                role="tab"
+                aria-controls="empresa-{{ oferta.licitante_id }}"
+                aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
+              >
+                {{ oferta.nombreempresa }}
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="card-body">
+        <!-- Tab panes: contenido de cada empresa -->
+        <div class="tab-content">
+          {% for oferta in ofertas %}
+            <div
+              class="tab-pane fade {% if loop.first %}show active{% endif %}"
+              id="empresa-{{ oferta.licitante_id }}"
+              role="tabpanel"
+              aria-labelledby="tab-empresa-{{ oferta.licitante_id }}"
+            >
+              <h5 class="card-title mt-2">{{ oferta.nombreempresa }}</h5>
+              <div class="table-responsive">
+                <table class="table table-bordered mt-3">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Criterio</th>
+                      <th>Puntuación</th>
+                      <th>Precio Base</th>
+                      <th>Fórmula</th>
+                      <th>Puntuación Máxima</th>
+                      <th>Comentarios</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ev in oferta.criterios_evaluacion %}
+                      <tr>
+                        {# Nombre del criterio #}
+                        <td class="align-middle">{{ ev.nombre }}</td>
+
+                        {# Campo editable: Puntuación #}
+                        <td>
+                          <input
+                            type="number"
+                            name="puntuacion_{{ oferta.licitante_id }}_{{ ev.id }}"
+                            class="form-control"
+                            min="0"
+                            step="0.01"
+                            value="{{ ev.puntuacion }}"
+                            required
+                          >
+                        </td>
+
+                        {# Precio base (solo lectura) #}
+                        <td>
+                          <input
+                            type="number"
+                            class="form-control"
+                            value="{{ ev.preciobase }}"
+                            readonly
+                          >
+                        </td>
+
+                        {# Nombre de la fórmula (solo lectura) #}
+                        <td>
+                          <input
+                            type="text"
+                            class="form-control"
+                            value="{{ ev.nombre_formula }}"
+                            readonly
+                          >
+                        </td>
+
+                        {# Puntuación máxima (solo lectura) #}
+                        <td>
+                          <input
+                            type="number"
+                            class="form-control"
+                            value="{{ ev.puntuacion_maxima }}"
+                            readonly
+                          >
+                        </td>
+
+                        {# Comentarios (editable) #}
+                        <td>
+                          <input
+                            type="text"
+                            name="comentarios_{{ oferta.licitante_id }}_{{ ev.id }}"
+                            class="form-control"
+                            value="{{ ev.comentarios }}"
+                          >
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endfor %}
         </div>
-        {% endfor %}
+      </div>
+
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-primary">Guardar Evaluación</button>
+        <a
+          href="{{ url_for('licitaciones.edit_licitacion_route', lic_id=lic['id']) }}"
+          class="btn btn-secondary ms-2"
+        >Cancelar</a>
       </div>
     </div>
-    <div class="card-footer text-end">
-      <a href="{{ url_for('licitaciones.index') }}" class="btn btn-secondary me-2">Cancelar</a>
-      <button type="submit" class="btn btn-primary">Guardar evaluación</button>
-    </div>
-  </div>
-</form>
+  </form>
+</div>
 {% endblock %}

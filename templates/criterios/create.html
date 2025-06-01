@@ -6,14 +6,20 @@
     <h5 class="card-title">Nuevo Criterio</h5>
     <form method="post">
       <input type="hidden" name="licitacion_id" value="{{ lic_id }}">
+      
+      <!-- Nombre -->
       <div class="mb-3">
         <label for="NombreCriterio" class="form-label">Nombre</label>
         <input type="text" class="form-control" id="NombreCriterio" name="NombreCriterio" required>
       </div>
+      
+      <!-- Descripción -->
       <div class="mb-3">
         <label for="Descripcion" class="form-label">Descripción</label>
         <textarea class="form-control" id="Descripcion" name="Descripcion"></textarea>
       </div>
+      
+      <!-- Tipo de Criterio -->
       <div class="mb-3">
         <label for="tipocriterio_id" class="form-label">Tipo de Criterio</label>
         <select class="form-select" id="tipocriterio_id" name="tipocriterio_id" required>
@@ -23,10 +29,14 @@
           {% endfor %}
         </select>
       </div>
+      
+      <!-- Peso (sólo Técnico) -->
       <div class="mb-3" id="peso-field" style="display:none;">
         <label for="Peso" class="form-label">Peso</label>
         <input type="number" class="form-control" id="Peso" name="Peso">
       </div>
+      
+      <!-- Fórmula (sólo Económico) -->
       <div class="mb-3" id="formula-field" style="display:none;">
         <label for="formula_id" class="form-label">Fórmula</label>
         <select class="form-select" id="formula_id" name="formula_id">
@@ -36,53 +46,79 @@
           {% endfor %}
         </select>
       </div>
+      
+      <!-- Precio Base (sólo Económico) -->
       <div class="mb-3" id="precio-field" style="display:none;">
         <label for="PrecioBase" class="form-label">Precio Base</label>
         <input type="number" step="0.01" class="form-control" id="PrecioBase" name="PrecioBase">
       </div>
+      
+      <!-- Puntuación Máxima (sólo Económico) -->
+      <div class="mb-3" id="puntuacionmax-field" style="display:none;">
+        <label for="PuntuacionMaxima" class="form-label">Puntuación Máxima</label>
+        <input type="number" step="0.01" class="form-control" id="PuntuacionMaxima" name="PuntuacionMaxima">
+      </div>
+      
       <button type="submit" class="btn btn-primary">Crear</button>
       <a href="{{ url_for('criterios.index', lic_id=lic_id) }}" class="btn btn-secondary">Cancelar</a>
     </form>
   </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const tipoSelect = document.getElementById('tipocriterio_id');
-  const pesoField = document.getElementById('peso-field');
-  const formulaField = document.getElementById('formula-field');
-  const precioField = document.getElementById('precio-field');
-  const inputPeso = document.getElementById('Peso');
-  const selectFormula = document.getElementById('formula_id');
-  const inputPrecio = document.getElementById('PrecioBase');
+  const tipoSelect          = document.getElementById('tipocriterio_id');
+  const pesoField           = document.getElementById('peso-field');
+  const formulaField        = document.getElementById('formula-field');
+  const precioField         = document.getElementById('precio-field');
+  const puntMaxField        = document.getElementById('puntuacionmax-field');
+  const inputPeso           = document.getElementById('Peso');
+  const selectFormula       = document.getElementById('formula_id');
+  const inputPrecio         = document.getElementById('PrecioBase');
+  const inputPuntuacionMax  = document.getElementById('PuntuacionMaxima');
 
   function toggleFields() {
-    const selectedOption = tipoSelect.selectedOptions[0];
-    const tipo = selectedOption ? selectedOption.getAttribute('data-tipo') : '';
+    const selOpt = tipoSelect.selectedOptions[0];
+    const tipo   = selOpt ? selOpt.getAttribute('data-tipo') : '';
+
+    // Para “Técnico”: solo mostramos “Peso”
     if (tipo === 'Técnico') {
       pesoField.style.display = 'block';
-      inputPeso.required = true;
+      inputPeso.required      = true;
     } else {
       pesoField.style.display = 'none';
-      inputPeso.required = false;
-      inputPeso.value = '';
+      inputPeso.required      = false;
+      inputPeso.value         = '';
     }
+
+    // Para “Económico”: mostramos “Fórmula”, “Precio Base” y “Puntuación Máxima”
     if (tipo === 'Económico') {
       formulaField.style.display = 'block';
-      selectFormula.required = true;
-      precioField.style.display = 'block';
-      inputPrecio.required = true;
-    } else {
+      selectFormula.required     = true;
+
+      precioField.style.display  = 'block';
+      inputPrecio.required       = true;
+
+      puntMaxField.style.display = 'block';
+      inputPuntuacionMax.required= true;
+    }
+    else {
       formulaField.style.display = 'none';
-      selectFormula.required = false;
-      selectFormula.selectedIndex = 0;
-      precioField.style.display = 'none';
-      inputPrecio.required = false;
-      inputPrecio.value = '';
+      selectFormula.required     = false;
+      selectFormula.selectedIndex= 0;
+
+      precioField.style.display  = 'none';
+      inputPrecio.required       = false;
+      inputPrecio.value          = '';
+
+      puntMaxField.style.display = 'none';
+      inputPuntuacionMax.required= false;
+      inputPuntuacionMax.value   = '';
     }
   }
 
   tipoSelect.addEventListener('change', toggleFields);
-  toggleFields();
+  toggleFields();  // Ejecutar al cargar para ocultar/mostrar según valor inicial
 });
 </script>
 {% endblock %}

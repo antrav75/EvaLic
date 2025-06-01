@@ -71,3 +71,4 @@ def obtener_licitacion_por_id(app, licitacion_id):
     db = get_db(app)
     row = fetch_licitacion_by_id(db, licitacion_id)
     return dict(row) if row else None
+

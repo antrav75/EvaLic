@@ -5,7 +5,7 @@ from flask import (
     url_for, flash, session, current_app, abort
 )
 from math import ceil
-from models.dao import get_db, get_role_id, get_formulas, guardar_evaluacion_economica
+from models.dao import get_db, get_role_id, get_formulas, guardar_evaluacion_economica, guardar_o_actualizar_evaluacion_economica
 
 from services.licitacion_service import (
     list_licitaciones, get_licitacion, create_licitacion,
@@ -19,9 +19,8 @@ from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluaci
 from services.criterio_service import listar_economicos
 from services.resultados_service import generar_informe_tecnico
 from services.licitacion_service import obtener_licitacion_por_id
-from services.oferta_service import listar_ofertas_por_licitacion
 
-from services.oferta_service import list_ofertas_logic, evaluate_sobre1_logic
+from services.oferta_service import list_ofertas_admitidas_logic, evaluate_sobre1_logic
 from services.licitacion_service import get_licitacion as get_licitacion_logic
 
 licitaciones_bp = Blueprint('licitaciones', __name__, url_prefix='/licitaciones')
@@ -219,72 +218,105 @@ def evaluadores_licitacion(lic_id):
         flash(str(e), 'error')
     return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=lic_id))
 
-@licitaciones_bp.route('/<int:licitacion_id>/evaluar_sobre3', methods=['GET', 'POST'])
+@licitaciones_bp.route('/<int:licitacion_id>/evaluar_sobre3', methods=('GET', 'POST'))
 def evaluar_sobre3(licitacion_id):
-    # Autenticación y contexto
+    # 1. Autenticación: solo rol evaluador (role_id == 2)
     if 'user_id' not in session or session.get('role_id') != 2:
         return redirect(url_for('auth.login'))
-
     usuario_id = session['user_id']
     db = get_db(current_app)
 
-    # POST: guardar o actualizar evaluaciones
+    # 2. Obtener todas las fórmulas para mostrar nombre de fórmula
+    formulas_list = get_formulas(current_app)
+    formulas_map = { f['id']: f['NombreFormula'] for f in formulas_list }
+
+    # 3. Procesar POST: guardar o actualizar cada evaluación
     if request.method == 'POST' and request.form:
-        ofertas = list_ofertas_logic(current_app, licitacion_id)
-        criterios = listar_economicos(current_app, licitacion_id)
-        for oferta in ofertas:
+        # 3.1. Recuperar ofertas y criterios económicos desde servicios
+        ofertas_bd = list_ofertas_admitidas_logic(current_app, licitacion_id)
+        criterios_bd = listar_economicos(current_app, licitacion_id)
+
+        # 3.2. Iterar cada oferta y cada criterio para leer valores del formulario
+        for oferta in ofertas_bd:
             lid = oferta['licitante_id']
-            for c in criterios:
+            for c in criterios_bd:
                 cid = c['id']
-                puntuacion = request.form.get(f'puntuacion_{lid}_{cid}')
-                formula_id = request.form.get(f'formula_{lid}_{cid}')
-                comentarios = request.form.get(f'comentarios_{lid}_{cid}', '')
-                guardar_evaluacion_economica(
+                # Leer puntuación enviada
+                raw_score = request.form.get(f'puntuacion_{lid}_{cid}', '').strip()
+                try:
+                    puntuacion = float(raw_score) if raw_score else 0.0
+                except ValueError:
+                    puntuacion = 0.0
+                    flash(f"Puntuación inválida para oferta {lid}, criterio {cid}.", 'danger')
+
+                # Leer comentarios
+                comentarios = request.form.get(f'comentarios_{lid}_{cid}', '').strip()
+
+                # 3.3. Llamar a la función DAO sin formula_id (no lo guardamos en evaluaciones)
+                guardar_o_actualizar_evaluacion_economica(
                     current_app,
                     licitacion_id,
                     lid,
                     cid,
                     puntuacion,
-                    formula_id,
                     comentarios,
-                    session.get('user_id')
+                    usuario_id
                 )
-        flash('Evaluación guardada con éxito', 'success')
+
+        flash("Evaluaciones económicas guardadas correctamente.", 'success')
+        # Después de procesar POST, recargamos la vista con los valores actuales
         return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=licitacion_id))
 
-    
-   
-    # GET: preparar datos para la vista
+    # 4. Reconstruir datos para mostrar en GET y tras POST
+
+    # 4.1. Datos generales de la licitación
     lic = get_licitacion_logic(db, licitacion_id)
-    # Convertir filas a dicts para permitir asignaciones
-    raw_ofertas = list_ofertas_logic(current_app, licitacion_id)
-    ofertas = [dict(of) for of in raw_ofertas]
-    # Filtrar criterios técnicos
+
+    # 4.2. Recuperar ofertas y criterios
+    raw_ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
     criterios = listar_economicos(current_app, licitacion_id)
+
+    # 4.3. Obtener evaluaciones existentes de este usuario en esta licitación
     evaluaciones = obtener_evaluaciones(current_app, licitacion_id, usuario_id)
 
-    # Mapa de evaluaciones existentes
+    # 4.4. Crear mapa para buscar evaluación por (licitante_id, criterio_id)
     eval_map = {
         (e['licitante_id'], e['criterio_id']): e
         for e in evaluaciones
     }
 
-    # Construir lista de criterios por oferta
-    for oferta in ofertas:
-        lista = []
+    # 4.5. Construir lista final de ofertas con sus “criterios_evaluacion”
+    ofertas = []
+    for of in raw_ofertas:
+        oferta_dict = dict(of)  # convierte Row a dict
+        lista_criterios = []
         for c in criterios:
-            key = (oferta['licitante_id'], c['id'])
+            key = (of['licitante_id'], c['id'])
             e = eval_map.get(key)
-            score = e['puntuacion'] if e else 0
-            lista.append({
+
+            # Si ya existe evaluación, extraemos sus datos; si no, campos vacíos
+            puntuacion_existente = e['puntuacion'] if e else ''
+            comentarios_existente = e['comentarios'] if e else ''
+            # El criterio ya contiene formula_id en la tabla criterios
+            formula_id_criterio = c['formula_id']
+            nombre_f = formulas_map.get(formula_id_criterio, '–')
+
+            lista_criterios.append({
                 'id': c['id'],
                 'nombre': c['NombreCriterio'],
-                'puntuacion': e['puntuacion'] if e else '', 
+                'puntuacion': puntuacion_existente,
                 'preciobase': c['preciobase'],
-                'formula_id': e['formula_id'] if e else '',
-                'comentarios': e['comentarios'] if e else '',
+                'formula_id': formula_id_criterio,
+                'nombre_formula': nombre_f,
+                'puntuacion_maxima': c['puntuacionmaxima'],
+                'comentarios': comentarios_existente
             })
-        oferta['criterios_evaluacion'] = lista
+        oferta_dict['criterios_evaluacion'] = lista_criterios
+        ofertas.append(oferta_dict)
 
-    formulas = get_formulas(current_app)
-    return render_template('licitaciones/evaluar_sobre3.html', lic=lic, ofertas=ofertas, formulas=formulas)
+    # 5. Renderizar la plantilla con lic, ofertas y la lista de fórmulas (por si hiciera falta)
+    return render_template(
+        'licitaciones/evaluar_sobre3.html',
+        lic=lic,
+        ofertas=ofertas
+    )

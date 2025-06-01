@@ -19,6 +19,7 @@ def crear(db, data, usuario_id):
     tip_id = int(data['tipocriterio_id'])
     formula = int(data.get('formula_id')) if data.get('formula_id') else None
     precio_base = float(data.get('PrecioBase')) if data.get('PrecioBase') else None
+    puntuacion_maxima = float(data.get('PuntuacionMaxima')) if data.get('PuntuacionMaxima') else None
 
     create_criterio(
         db,
@@ -28,7 +29,8 @@ def crear(db, data, usuario_id):
         tip_id,
         int(data['licitacion_id']),
         formula,
-        precio_base
+        precio_base,
+        puntuacion_maxima
     )
 
 def actualizar(db, crit_id, data):
@@ -38,6 +40,7 @@ def actualizar(db, crit_id, data):
     tip_id = int(data['tipocriterio_id'])
     formula = int(data.get('formula_id')) if data.get('formula_id') else None
     precio_base = float(data.get('PrecioBase')) if data.get('PrecioBase') else None
+    puntuacion_maxima = float(data.get('PuntuacionMaxima')) if data.get('PuntuacionMaxima') else None
 
     edit_criterio(
         db,
@@ -47,7 +50,8 @@ def actualizar(db, crit_id, data):
         peso,
         tip_id,
         formula,
-        precio_base
+        precio_base,
+        puntuacion_maxima
     )
 
 def borrar(db, crit_id):

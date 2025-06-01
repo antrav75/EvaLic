@@ -87,7 +87,8 @@ def init_db(app):
         NombreCriterio TEXT NOT NULL,
         descripcion TEXT,
         peso INTEGER,
-        PrecioBase INTEGER,             
+        PrecioBase INTEGER,
+        PuntuacionMaxima INTEGER,                          
         tipocriterio_id INTEGER NOT NULL,
         licitacion_id INTEGER NOT NULL,
         formula_id INTEGER,                          
@@ -97,20 +98,18 @@ def init_db(app):
     );
 
       CREATE TABLE IF NOT EXISTS evaluaciones (
-        puntuacion INTEGER,
-        formula_id INTEGER,                          
+        puntuacion INTEGER,                         
         comentarios TEXT,
         fechaevaluacion TEXT ,
         licitacion_id INTEGER NOT NULL,             
         usuario_id INTEGER NOT NULL,
         licitante_id INTEGER NOT NULL,
-        criterio_id INTEGER,
+        criterio_id INTEGER,             
         PRIMARY KEY (licitacion_id, usuario_id, licitante_id, criterio_id)
         FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id)                                       
         FOREIGN KEY (usuario_id) REFERENCES users(id)
         FOREIGN KEY (licitante_id) REFERENCES licitantes(id)
-        FOREIGN KEY (criterio_id) REFERENCES criterio(id)
-        FOREIGN KEY (formula_id) REFERENCES formulas(id)                                                                          
+        FOREIGN KEY (criterio_id) REFERENCES criterio(id)                                                                          
     );   
 
       CREATE TABLE IF NOT EXISTS ofertas (
@@ -300,11 +299,8 @@ def update_admitidasobre1(app, licitacion_id, licitante_id, admitido):
     )
     db.commit()
 
-def get_formulas(app):
-    conn = get_db(app)
-    return conn.execute("SELECT id,NombreFormula FROM formulas").fetchall()
 
-def guardar_evaluacion_economica(app, licitacion_id, licitante_id, criterio_id, puntuacion, formula_id, comentarios, usuario_id):
+def guardar_evaluacion_economica(app, licitacion_id, licitante_id, criterio_id, puntuacion, formula_id, comentarios, usuario_id,puntuacionmaxima):
     db = get_db(app)
     cur = db.cursor()
 
@@ -327,7 +323,116 @@ def guardar_evaluacion_economica(app, licitacion_id, licitante_id, criterio_id, 
             INSERT INTO evaluaciones (
                 licitacion_id, licitante_id, criterio_id,
                 puntuacion, formula_id, comentarios, usuario_id, fechaevaluacion
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (licitacion_id, licitante_id, criterio_id, puntuacion, formula_id, comentarios, usuario_id, datetime.now()))
 
     db.commit()
+
+def get_db(app):
+    """
+    Devuelve una conexión SQLite en g.sqlite_db.
+    """
+    if 'sqlite_db' not in g:
+        g.sqlite_db = sqlite3.connect(
+            app.config['DATABASE'],
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+        g.sqlite_db.row_factory = sqlite3.Row
+    return g.sqlite_db
+
+def get_formulas(app):
+    """
+    Recupera todas las fórmulas de la tabla formulas.
+    Devuelve lista de dicts con claves 'id' y 'nombre'.
+    """
+    db = get_db(app)
+    filas = db.execute("SELECT id, NombreFormula FROM formulas").fetchall()
+    return [ {'id': f['id'], 'NombreFormula': f['NombreFormula']} for f in filas ]
+
+def guardar_o_actualizar_evaluacion_economica(
+        app,
+        licitacion_id,
+        licitante_id,
+        criterio_id,
+        puntuacion,
+        comentarios,
+        usuario_id
+    ):
+    """
+    Inserta o actualiza una evaluación económica.
+    La tabla 'evaluaciones' NO tiene campo 'id' ni 'puntuacionmaxima';
+    se identifica la fila por la combinación:
+      (licitacion_id, licitante_id, criterio_id, usuario_id).
+    """
+    db = get_db(app)
+
+    # 1) Comprobar si existe ya esa evaluación
+    existing = db.execute(
+        """
+        SELECT 1
+        FROM evaluaciones
+        WHERE
+          licitacion_id = ?
+          AND licitante_id = ?
+          AND criterio_id = ?
+          AND usuario_id = ?
+        """,
+        (licitacion_id, licitante_id, criterio_id, usuario_id)
+    ).fetchone()
+
+    if existing:
+        # 2a) Si existe, actualizar los campos necesarios
+        db.execute(
+            """
+            UPDATE evaluaciones
+            SET
+              puntuacion      = ?,
+              comentarios     = ?,
+              fechaevaluacion = ?
+            WHERE
+              licitacion_id = ?
+              AND licitante_id = ?
+              AND criterio_id = ?
+              AND usuario_id = ?
+            """,
+            (
+                puntuacion,
+                comentarios,
+                datetime.now(),
+                licitacion_id,
+                licitante_id,
+                criterio_id,
+                usuario_id
+            )
+        )
+    else:
+        # 2b) Si no existe, insertar nueva fila (sin puntuacionmaxima)
+        db.execute(
+            """
+            INSERT INTO evaluaciones (
+              licitacion_id,
+              licitante_id,
+              criterio_id,
+              puntuacion,
+              comentarios,
+              usuario_id,
+              fechaevaluacion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                licitacion_id,
+                licitante_id,
+                criterio_id,
+                puntuacion,
+                comentarios,
+                usuario_id,
+                datetime.now()
+            )
+        )
+
+    db.commit()
+
+
+
+
+

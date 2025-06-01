@@ -40,6 +40,12 @@
         <label for="PrecioBase" class="form-label">Precio Base</label>
         <input type="number" step="0.01" class="form-control" id="PrecioBase" name="PrecioBase" value="{{ criterio.PrecioBase }}">
       </div>
+
+      <!-- Puntuación Máxima (sólo Económico) -->
+      <div class="mb-3" id="puntuacionmax-field" style="display:none;">
+        <label for="PuntuacionMaxima" class="form-label">Puntuación Máxima</label>
+        <input type="number" step="0.01" class="form-control" id="PuntuacionMaxima" name="PuntuacionMaxima" value="{{ criterio.PuntuacionMaxima }}">
+      </div>
       <button type="submit" class="btn btn-primary">Actualizar</button>
       <a href="{{ url_for('criterios.index', lic_id=lic_id) }}" class="btn btn-secondary">Cancelar</a>
     </form>
@@ -47,42 +53,58 @@
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const tipoSelect = document.getElementById('tipocriterio_id');
-  const pesoField = document.getElementById('peso-field');
-  const formulaField = document.getElementById('formula-field');
-  const precioField = document.getElementById('precio-field');
-  const inputPeso = document.getElementById('Peso');
-  const selectFormula = document.getElementById('formula_id');
-  const inputPrecio = document.getElementById('PrecioBase');
+  const tipoSelect          = document.getElementById('tipocriterio_id');
+  const pesoField           = document.getElementById('peso-field');
+  const formulaField        = document.getElementById('formula-field');
+  const precioField         = document.getElementById('precio-field');
+  const puntMaxField        = document.getElementById('puntuacionmax-field');
+  const inputPeso           = document.getElementById('Peso');
+  const selectFormula       = document.getElementById('formula_id');
+  const inputPrecio         = document.getElementById('PrecioBase');
+  const inputPuntuacionMax  = document.getElementById('PuntuacionMaxima');
 
   function toggleFields() {
-    const selectedOption = tipoSelect.selectedOptions[0];
-    const tipo = selectedOption ? selectedOption.getAttribute('data-tipo') : '';
+    const selOpt = tipoSelect.selectedOptions[0];
+    const tipo   = selOpt ? selOpt.getAttribute('data-tipo') : '';
+
+    // Para “Técnico”: solo mostramos “Peso”
     if (tipo === 'Técnico') {
       pesoField.style.display = 'block';
-      inputPeso.required = true;
+      inputPeso.required      = true;
     } else {
       pesoField.style.display = 'none';
-      inputPeso.required = false;
-      inputPeso.value = '';
+      inputPeso.required      = false;
+      inputPeso.value         = '';
     }
+
+    // Para “Económico”: mostramos “Fórmula”, “Precio Base” y “Puntuación Máxima”
     if (tipo === 'Económico') {
       formulaField.style.display = 'block';
-      selectFormula.required = true;
-      precioField.style.display = 'block';
-      inputPrecio.required = true;
-    } else {
+      selectFormula.required     = true;
+
+      precioField.style.display  = 'block';
+      inputPrecio.required       = true;
+
+      puntMaxField.style.display = 'block';
+      inputPuntuacionMax.required= true;
+    }
+    else {
       formulaField.style.display = 'none';
-      selectFormula.required = false;
-      selectFormula.selectedIndex = 0;
-      precioField.style.display = 'none';
-      inputPrecio.required = false;
-      inputPrecio.value = '';
+      selectFormula.required     = false;
+      selectFormula.selectedIndex= 0;
+
+      precioField.style.display  = 'none';
+      inputPrecio.required       = false;
+      inputPrecio.value          = '';
+
+      puntMaxField.style.display = 'none';
+      inputPuntuacionMax.required= false;
+      inputPuntuacionMax.value   = '';
     }
   }
 
   tipoSelect.addEventListener('change', toggleFields);
-  toggleFields();
+  toggleFields();  // Ejecutar al cargar para ocultar/mostrar según valor inicial
 });
 </script>
 {% endblock %}

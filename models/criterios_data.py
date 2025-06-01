@@ -21,20 +21,20 @@ def list_criterios(db, licitacion_id):
 def get_criterio(db, criterio_id):
     return db.execute("SELECT * FROM criterios WHERE id=?", (criterio_id,)).fetchone()
 
-def create_criterio(db, nombre, descripcion, peso, tipo_id, lic_id, formula_id, precio_base):
+def create_criterio(db, nombre, descripcion, peso, tipo_id, lic_id, formula_id, precio_base,puntuacion_maxima):
     db.execute("""
         INSERT INTO criterios 
-        (NombreCriterio, Descripcion, Peso, tipocriterio_id, licitacion_id, formula_id, PrecioBase)
-        VALUES(?,?,?,?,?,?,?)
-    """, (nombre, descripcion, peso, tipo_id, lic_id, formula_id, precio_base))
+        (NombreCriterio, Descripcion, Peso, tipocriterio_id, licitacion_id, formula_id, PrecioBase, PuntuacionMaxima)
+        VALUES(?,?,?,?,?,?,?,?)
+    """, (nombre, descripcion, peso, tipo_id, lic_id, formula_id, precio_base,puntuacion_maxima))
     db.commit()
 
-def edit_criterio(db, criterio_id, nombre, descripcion, peso, tipo_id, formula_id, precio_base):
+def edit_criterio(db, criterio_id, nombre, descripcion, peso, tipo_id, formula_id, precio_base, puntuacion_maxima):
     db.execute("""
         UPDATE criterios
-        SET NombreCriterio=?, Descripcion=?, Peso=?, tipocriterio_id=?, formula_id=?, PrecioBase=?
+        SET NombreCriterio=?, Descripcion=?, Peso=?, tipocriterio_id=?, formula_id=?, PrecioBase=?, PuntuacionMaxima=?
         WHERE id=?
-    """, (nombre, descripcion, peso, tipo_id, formula_id, precio_base, criterio_id))
+    """, (nombre, descripcion, peso, tipo_id, formula_id, precio_base,puntuacion_maxima,criterio_id))
     db.commit()
 
 def delete_criterio(db, criterio_id):

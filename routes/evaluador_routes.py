@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, flash
 from services.evaluaciones_service import listar_por_evaluador
-from services.oferta_service import list_ofertas_logic, evaluate_sobre1_logic
+from services.oferta_service import list_ofertas_admitidas_logic, evaluate_sobre1_logic
 from services.licitacion_service import get_licitacion as get_licitacion_logic
 from models.dao import get_db
 
@@ -8,7 +8,6 @@ from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluaci
 from services.criterio_service import listar_tecnicos
 from services.resultados_service import generar_informe_tecnico
 from services.licitacion_service import obtener_licitacion_por_id
-from services.oferta_service import listar_ofertas_por_licitacion
 
 evaluador_bp = Blueprint('evaluador', __name__, url_prefix='/evaluador')
 evaluador_bp.route('/<int:licitacion_id>/evaluar', methods=['GET', 'POST'])
@@ -33,7 +32,7 @@ def evaluar(licitacion_id):
 
     # POST: guardar o actualizar evaluaciones
     if request.method == 'POST':
-        ofertas = list_ofertas_logic(current_app, licitacion_id)
+        ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
         # Filtrar solo criterios técnicos
         criterios = listar_tecnicos(current_app, licitacion_id)
         for oferta in ofertas:
@@ -60,7 +59,7 @@ def evaluar(licitacion_id):
     # GET: preparar datos para la vista
     lic = get_licitacion_logic(db, licitacion_id)
     # Convertir filas a dicts para permitir asignaciones
-    raw_ofertas = list_ofertas_logic(current_app, licitacion_id)
+    raw_ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
     ofertas = [dict(of) for of in raw_ofertas]
     # Filtrar criterios técnicos
     criterios = listar_tecnicos(current_app, licitacion_id)
@@ -102,7 +101,7 @@ def informe_tecnico(licitacion_id):
     # Generar y obtener datos del informe (siempre sobrescribe previos)
     informe, evaluadores = generar_informe_tecnico(current_app, licitacion_id)
     # Obtener ofertas para encabezados de columna
-    raw_ofertas = listar_ofertas_por_licitacion(db, licitacion_id)  # ajusta a tu función
+    raw_ofertas = list_ofertas_admitidas_logic(db, licitacion_id)  # ajusta a tu función
     ofertas = [dict(of) for of in raw_ofertas]
 
     return render_template(

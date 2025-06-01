@@ -14,6 +14,20 @@ def list_ofertas(db, licitacion_id=None):
     cur = db.execute(query, params)
     return cur.fetchall()
 
+def list_ofertas_admitidas(db, licitacion_id=None):
+    query = """
+        SELECT o.licitacion_id, o.licitante_id, o.fechapresentacion, o.admitidasobre1, l.nombreempresa
+        FROM ofertas o
+        JOIN licitantes l ON o.licitante_id = l.id
+    """
+    params = ()
+    if licitacion_id:
+        query += " WHERE o.admitidasobre1 =1 AND o.licitacion_id=?"
+        params = (licitacion_id,)
+    query += " ORDER BY o.licitacion_id, o.licitante_id"
+    cur = db.execute(query, params)
+    return cur.fetchall()
+
 def get_oferta(db, licitacion_id, licitante_id):
     cur = db.execute(
         """
@@ -44,13 +58,5 @@ def remove_oferta(db, licitacion_id, licitante_id):
     db.execute("DELETE FROM ofertas WHERE licitacion_id=? AND licitante_id=?", (licitacion_id, licitante_id))
     db.commit()
 
-def fetch_ofertas_by_licitacion(db, licitacion_id):
-    """Devuelve todas las ofertas de una licitación con nombre de empresa"""
-    sql = """
-        SELECT o.*, e.nombreempresa AS nombre_licitante
-        FROM ofertas o
-        JOIN licitantes e ON o.licitante_id = e.id
-        WHERE o.licitacion_id = ?
-    """
-    return db.execute(sql, (licitacion_id,)).fetchall()
+
 
