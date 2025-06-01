@@ -35,14 +35,11 @@ def init_db(app):
         FOREIGN KEY(role_id) REFERENCES roles(id)
     );
 
-    CREATE TABLE IF NOT EXISTS event_audit (
+    CREATE TABLE IF NOT EXISTS auditoria (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        actor_username TEXT NOT NULL,
-        actor_user_id INTEGER,
-        event_type TEXT NOT NULL,
-        target_username TEXT,
-        target_user_id INTEGER,
-        success INTEGER NOT NULL,
+        nombreUsuario TEXT NOT NULL,
+        tipoEvento TEXT NOT NULL,
+        descripcionEvento TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -268,15 +265,13 @@ def delete_user(db, user_id):
     db.execute("DELETE FROM users WHERE id=?", (user_id,))
     db.commit()
 
-def log_event(db, actor_username, actor_user_id, event_type,
-              target_username=None, target_user_id=None, success=1):
+def log_event(db, nombreUsuario, TipoEvento, DescripcionEvento,success=1):
     db.execute(
-        """INSERT INTO event_audit
-           (actor_username,actor_user_id,event_type,
-            target_username,target_user_id,success)
-           VALUES(?,?,?,?,?,?)""",
-        (actor_username,actor_user_id,event_type,
-         target_username,target_user_id,success)
+        """INSERT INTO auditoria
+           (nombreUsuario,tipoEvento,
+            descripcionEvento)
+           VALUES(?,?,?)""",
+        (nombreUsuario,TipoEvento,DescripcionEvento)
     )
     db.commit()
 

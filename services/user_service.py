@@ -19,20 +19,17 @@ def create_user(db, session, username, email, password, role_id, active=True):
         raise ValueError("El nombre de usuario no debe contener espacios")
     pwd_hash = generate_password_hash(password)
     new_id = add_user(db, username, email, pwd_hash, role_id, active)
-    log_event(db, session['username'], session['user_id'],
-              'create_user', username, new_id, 1)
+    log_event(db, session['username'], 'create_user', username)
 
 def edit_user(db, session, user_id, username, email, password, role_id, active):
     if ' ' in username:
         raise ValueError("El nombre de usuario no debe contener espacios")
     pwd_hash = generate_password_hash(password) if password else None
     update_user(db, user_id, username, email, pwd_hash, role_id, active)
-    log_event(db, session['username'], session['user_id'],
-              'edit_user', username, user_id, 1)
+    log_event(db, session['username'], 'edit_user', username)
 
 def remove_user(db, session, user_id):
     user = db.execute("SELECT username FROM users WHERE id=?", (user_id,)).fetchone()
     if user:
         delete_user(db, user_id)
-        log_event(db, session['username'], session['user_id'],
-                  'delete_user', user['username'], user_id, 1)
+        log_event(db, session['username'], 'delete_user', user)
