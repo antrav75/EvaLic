@@ -1,21 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-
-{# — Depuración: mostrar todos los valores distintos de tipo_criterio —#}
-{% set tipos = informe | map(attribute='tipo_criterio') | unique %}
-<div class="alert alert-info">
-  <strong>DEBUG:</strong> tipos en informe = {{ tipos | join(', ') }}
-</div>
-{# — Fin de depuración —#}
-
-{# — DEBUG EXTRA: imprime cada valor de tipo_criterio con su “repr” —#}
-<pre style="background:#f0f0f0; padding:8px; border:1px solid #ccc; font-size:0.9em;">
-{% for row in informe %}
-  licitante_id={{ row.licitante_id }} → tipo_criterio='{{ row.tipo_criterio }}'
-{% endfor %}
-</pre>
-
   <h2>INFORME DE RESULTADOS</h2>
 
   {# ------------------------------------------------------------ #}
@@ -191,10 +176,5 @@
       {% endfor %}
     </tbody>
   </table>
-
-  <div class="text-center mt-4">
-    <a href="{{ url_for('evaluador.index') }}" class="btn btn-primary">Volver a mis licitaciones</a>
-  </div>
   {% endblock %}
-
   
