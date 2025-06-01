@@ -1,8 +1,27 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
+
+{# — Depuración: mostrar todos los valores distintos de tipo_criterio —#}
+{% set tipos = informe | map(attribute='tipo_criterio') | unique %}
+<div class="alert alert-info">
+  <strong>DEBUG:</strong> tipos en informe = {{ tipos | join(', ') }}
+</div>
+{# — Fin de depuración —#}
+
+{# — DEBUG EXTRA: imprime cada valor de tipo_criterio con su “repr” —#}
+<pre style="background:#f0f0f0; padding:8px; border:1px solid #ccc; font-size:0.9em;">
+{% for row in informe %}
+  licitante_id={{ row.licitante_id }} → tipo_criterio='{{ row.tipo_criterio }}'
+{% endfor %}
+</pre>
+
   <h2>INFORME DE RESULTADOS</h2>
-  <h4 class="mt-3">1. Informe técnico (Sobre2)</h4>
+
+  {# ------------------------------------------------------------ #}
+  {# 1) SECCIÓN TÉCNICA                                         #}
+  {# ------------------------------------------------------------ #}
+  <h4 class="mt-3">1. Informe técnico (Sobre 2)</h4>
 
   <p><strong>Evaluadores:</strong>
     {% for ev in evaluadores %}
@@ -15,29 +34,167 @@
       <tr>
         <th>Criterio Técnico</th>
         {% for oferta in ofertas %}
-          <th>{{ oferta.nombreempresa }}</th>
+         <th class="text-center">{{ oferta.nombreempresa }}</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% set criterios = informe|map(attribute='criterio_id')|unique %}
-      {% for criterio in criterios %}
-      <tr>
-        {% set nombre = (informe|selectattr('criterio_id','equalto',criterio)|map(attribute='criterio_nombre')|first) %}
-        <td>{{ nombre }}</td>
-        {% for oferta in ofertas %}
-          {% set valor = (informe
-            |selectattr('criterio_id','equalto',criterio)
-            |selectattr('licitante_id','equalto',oferta.licitante_id)
-            |map(attribute='avg_ponderado')
-            |first) %}
-          <td>{{ valor or 0 }}</td>
-        {% endfor %}
-      </tr>
+      {% for criterio in criterios_tecnicos %}
+        <tr>
+          <td><strong>{{ criterio.nombre_criterio }}</strong></td>
+          {% for oferta in ofertas %}
+            {% set match = (
+                 informe
+                 | selectattr('criterio_id','equalto', criterio.criterio_id)
+                 | selectattr('licitante_id','equalto', oferta.id)
+                 | first
+              ) %}
+            {% if match and match.puntuacionponderada is not none %}
+              {% set value = match.puntuacionponderada %}
+              {% if value == value|round %}
+                <td class="text-center">{{ value|int }}</td>
+              {% else %}
+                <td class="text-center">{{ value|round(4) }}</td>
+              {% endif %}
+            {% else %}
+              <td class="text-center">&ndash;</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <a href="{{ url_for('evaluador.index') }}" class="btn btn-secondary">Volver</a>
-</div>
-{% endblock %}
+  {# ------------------------------------------------------------ #}
+  {# 2) SECCIÓN ECONÓMICA                                        #}
+  {# ------------------------------------------------------------ #}
+ <h4 class="mt-5">2. Informe económico (Sobre 3)</h4>
+<table class="table table-bordered mt-3">
+  <thead>
+    <tr>
+      <th>Criterio Económico</th>
+      {% for oferta in ofertas %}
+        <th class="text-center">{{ oferta.nombreempresa }}</th>
+      {% endfor %}
+      {# Ya no hay columna global de AB aquí #}
+    </tr>
+  </thead>
+  <tbody>
+    {% for criterio in criterios_economicos %}
+      <tr>
+        <td><strong>{{ criterio.nombre_criterio }}</strong></td>
+        {% for oferta in ofertas %}
+          {# Buscamos la fila (criterio_id, licitante_id) #}
+          {% set match = (
+               informe
+               | selectattr('criterio_id','equalto', criterio.criterio_id)
+               | selectattr('licitante_id','equalto', oferta.id)
+               | first
+             ) %}
+          <td class="text-center">
+            {# Mostrar puntuación si existe #}
+            {% if match and match.puntuacionponderada is not none %}
+              {% set value = match.puntuacionponderada %}
+              {% if value == value|round %}
+                {{ value|int }}
+              {% else %}
+                {{ value|round(4) }}
+              {% endif %}
+            {% else %}
+              &ndash;
+            {% endif %}
+
+            {# Ahora, justo debajo de la puntuación, indicamos AB si match.ofertaAB == 1 #}
+            {% if match and match.ofertaAB == 1 %}
+              <br>
+              <small class="text-danger">AB</small>
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+  {# ------------------------------------------------------------ #}
+  {# 3) SECCIÓN DE RESULTADOS                                    #}
+  {# ------------------------------------------------------------ #}
+  <h4 class="mt-5">3. Resultados finales</h4>
+
+  <table class="table table-bordered mt-3">
+    <thead>
+      <tr>
+        <th>Empresa</th>
+        <th>Puntuación Técnica (Sobre 2)</th>
+        <th>Puntuación Económica (Sobre 3)</th>
+        <th>Puntuación Total (Sobre 5)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for oferta in ofertas %}
+
+        {# === Calculamos, para esta oferta, sus punt. técnica y económica === #}
+        {% set punt_tecnica = 0 %}
+        {% set punt_economica = 0 %}
+
+        {% for row in informe %}
+          {% if row.licitante_id == oferta.id %}
+            {# si coincide empresa... #}
+            {% if row.tipo_criterio == 'Técnico' and row.puntuacionponderada is not none %}
+              {% set punt_tecnica = punt_tecnica + row.puntuacionponderada %}
+            {% elif row.tipo_criterio == 'Económico' and row.puntuacionponderada is not none %}
+              {% set punt_economica = punt_economica + row.puntuacionponderada %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+
+        {# === Fila de la empresa con sus tres columnas === #}
+        <tr>
+          <td>{{ oferta.nombreempresa }}</td>
+
+          {# PUNTUACIÓN TÉCNICA #}
+          {% if punt_tecnica != 0 %}
+            {# Si es entero exacto, muéstralo sin decimales; si no, con 4 dígitos #}
+            {% if punt_tecnica == punt_tecnica|round %}
+              <td class="text-center">{{ punt_tecnica|int }}</td>
+            {% else %}
+              <td class="text-center">{{ punt_tecnica|round(4) }}</td>
+            {% endif %}
+          {% else %}
+            <td class="text-center">&ndash;</td>
+          {% endif %}
+
+          {# PUNTUACIÓN ECONÓMICA #}
+          {% if punt_economica != 0 %}
+            {% if punt_economica == punt_economica|round %}
+              <td class="text-center">{{ punt_economica|int }}</td>
+            {% else %}
+              <td class="text-center">{{ punt_economica|round(4) }}</td>
+            {% endif %}
+          {% else %}
+            <td class="text-center">&ndash;</td>
+          {% endif %}
+
+          {# PUNTUACIÓN TOTAL (suma de técnica + económica) #}
+          {% set total = punt_tecnica + punt_economica %}
+          {% if total != 0 %}
+            {% if total == total|round %}
+              <td class="text-center">{{ total|int }}</td>
+            {% else %}
+              <td class="text-center">{{ total|round(4) }}</td>
+            {% endif %}
+          {% else %}
+            <td class="text-center">&ndash;</td>
+          {% endif %}
+
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="text-center mt-4">
+    <a href="{{ url_for('evaluador.index') }}" class="btn btn-primary">Volver a mis licitaciones</a>
+  </div>
+  {% endblock %}
+
+  

@@ -31,3 +31,19 @@ def edit_licitante(db, licitante_id, nombreempresa, cif, direccion, ciudad, prov
 def remove_licitante(db, licitante_id):
     db.execute("DELETE FROM licitantes WHERE id=?", (licitante_id,))
     db.commit()
+
+def fetch_licitantes_por_licitacion(db, licitacion_id):
+    """
+    Devuelve todos los licitantes (id y nombreempresa) que tienen al menos
+    una evaluación registrada en la licitación `licitacion_id`.
+    """
+    sql = """
+        SELECT DISTINCT l.id, l.nombreempresa
+        FROM licitantes l
+        JOIN evaluaciones e ON l.id = e.licitante_id
+        WHERE e.licitacion_id = ?
+        ORDER BY l.nombreempresa
+    """
+    filas = db.execute(sql, (licitacion_id,)).fetchall()
+    # Convertir sqlite3.Row a dict para uso en plantilla
+    return [ {'id': fila['id'], 'nombreempresa': fila['nombreempresa']} for fila in filas ]

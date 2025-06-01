@@ -5,9 +5,13 @@ from services.licitacion_service import get_licitacion as get_licitacion_logic
 from models.dao import get_db
 
 from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
-from services.criterio_service import listar_tecnicos
+from services.criterio_service import listar_tecnicos, listar_economicos
 from services.resultados_service import generar_informe
 from services.licitacion_service import obtener_licitacion_por_id
+
+# Importamos el nuevo servicio
+from services.licitante_service import listar_licitantes_por_licitacion as list_licitantes
+
 
 evaluador_bp = Blueprint('evaluador', __name__, url_prefix='/evaluador')
 evaluador_bp.route('/<int:licitacion_id>/evaluar', methods=['GET', 'POST'])
@@ -90,24 +94,52 @@ def evaluar(licitacion_id):
 
     return render_template('evaluador/evaluar.html', lic=lic, ofertas=ofertas)
 
+
+licitaciones_bp = Blueprint('evaluador', __name__, url_prefix='/evaluador')
+
 @evaluador_bp.route('/<int:licitacion_id>/informe', methods=['GET'])
 def informe(licitacion_id):
-    if 'user_id' not in session or session.get('role_id') != 3:
+    if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
     db = get_db(current_app)
-    # Obtener datos de licitación (ajusta a tu propia función)
-    lic = obtener_licitacion_por_id(db, licitacion_id)
-    # Generar y obtener datos del informe (siempre sobrescribe previos)
-    informe, evaluadores = generar_informe(current_app, licitacion_id)
-    # Obtener ofertas para encabezados de columna
-    raw_ofertas = list_ofertas_admitidas_logic(db, licitacion_id)  # ajusta a tu función
-    ofertas = [dict(of) for of in raw_ofertas]
 
+    # 1) Recuperar datos de la licitación si los necesitas
+    lic = obtener_licitacion_por_id(db, licitacion_id)
+
+    # 2) Generar resultados técnicos + económicos
+    informe_rows, evaluadores = generar_informe(current_app, licitacion_id)
+
+    # 3) Solo licitantes que participaron
+    raw_ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
+    # <-- Aquí ajustamos para que cada dict tenga "id" en lugar de "licitante_id"
+    ofertas = [
+        {'id': o['licitante_id'], 'nombreempresa': o['nombreempresa']}
+        for o in raw_ofertas
+    ]
+
+    # 4) Cargar criterios técnicos y económicos (igual que antes)
+    criterios_tecnicos = []
+    for c in listar_tecnicos(current_app, licitacion_id):
+        criterios_tecnicos.append({
+            'criterio_id': c['id'],
+            'nombre_criterio': c['NombreCriterio']
+        })
+
+    criterios_economicos = []
+    for c in listar_economicos(current_app, licitacion_id):
+        criterios_economicos.append({
+            'criterio_id': c['id'],
+            'nombre_criterio': c['NombreCriterio']
+        })
+
+    # 5) Renderizar el informe pasándole todas las variables necesarias
     return render_template(
         'evaluador/informe.html',
         lic=lic,
-        informe=informe,
+        informe=informe_rows,
         evaluadores=evaluadores,
-        ofertas=ofertas
+        ofertas=ofertas,
+        criterios_tecnicos=criterios_tecnicos,
+        criterios_economicos=criterios_economicos
     )
