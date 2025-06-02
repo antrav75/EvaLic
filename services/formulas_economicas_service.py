@@ -22,20 +22,41 @@ def inversa_proporcional(puntuacion_maxima, oferta, mejor_oferta):
         return None
     return resultado if resultado >= 0 else None
 
-def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, presupuesto_base):
+def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, mejor_oferta, presupuesto_base):
     try:
         pm = float(puntuacion_maxima)
         of = float(oferta)
         pb = float(presupuesto_base)
+        mo = float(mejor_oferta)
     except (TypeError, ValueError):
         return None
-    if pm <= 0 or pb <= 0 or of < 0 or of >= pb:
+
+    # — Validaciones iniciales —
+    # 1) La puntuación máxima y el presupuesto base deben ser positivos
+    if pm <= 0 or pb <= 0:
         return None
-    try:
-        descuento = pb - of
-        resultado = (descuento / pb) * pm
-    except ZeroDivisionError:
+
+    # 2) La mejor oferta (mo) debe ser positiva 
+    if  mo <= 0:
         return None
+
+    # 3) La oferta (of) debe ser positiva
+    if of <= 0:
+        return None
+
+    # — Cálculo principal —
+    descuento_dividendo = of - pb      
+    descuento_divisor  = mo - pb     
+
+    print(f"Descuento dividendo: {descuento_dividendo}, Descuento divisor: {descuento_divisor}")
+    
+    # Si el divisor es cero, no podemos dividir
+    if descuento_divisor != 0:
+        resultado = (descuento_dividendo / descuento_divisor) * pm
+    else:
+        return None
+       
+    # Si la fórmula da negativo (por seguridad), devolvemos None
     return resultado if resultado >= 0 else None
 
 def reparto_proporcional(puntuacion_total, ofertas):

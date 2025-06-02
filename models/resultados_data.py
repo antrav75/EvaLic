@@ -47,9 +47,10 @@ def insert_resultados_tecnicos(db, licitacion_id):
 
 def insert_resultados_economicos(db, licitacion_id):
     """
-    Inserta (o reemplaza) los resultados económicos (Sobre 3) de la licitación.
-    Usa exclusivamente `evaluaciones.puntuacion` como “precio de oferta” y
-    `criterios.PrecioBase`. No intenta leer `ofertas.precio`.
+    Inserta (o reemplaza) los resultados económicos de la licitación.
+    Usa exclusivamente `evaluaciones.puntuacion` como “precio de oferta”,
+    `criterios.PrecioBase` y `criterios.PuntuacionMaxima` para escalar.
+    No intenta leer `ofertas.precio`.
     """
     from services.formulas_economicas_service import (
         inversa_proporcional,
@@ -66,7 +67,8 @@ def insert_resultados_economicos(db, licitacion_id):
           e.criterio_id,
           e.puntuacion AS precio_oferta,
           c.formula_id,
-          c.PrecioBase
+          c.PrecioBase,
+          c.PuntuacionMaxima
         FROM evaluaciones e
         JOIN criterios c ON e.criterio_id = c.id
         WHERE e.licitacion_id = ?
@@ -92,7 +94,7 @@ def insert_resultados_economicos(db, licitacion_id):
         mejor_oferta = min(precios_lista) if precios_lista else None
 
         for lid, precio_oferta in lista_lprecios:
-            # 3.c) Buscamos la fila base (solo una) para extraer usuario_id, formula_id y PrecioBase
+            # 3.c) Buscamos la fila base para extraer usuario_id, formula_id, PrecioBase y PuntuacionMaxima
             fila_base = next(
                 (f for f in filas_eval
                  if f['criterio_id'] == cid and f['licitante_id'] == lid),
@@ -101,33 +103,38 @@ def insert_resultados_economicos(db, licitacion_id):
             if not fila_base:
                 continue
 
-            usuario_id = fila_base['usuario_id']
-            formula_id = fila_base['formula_id']
+            usuario_id           = fila_base['usuario_id']
+            formula_id           = fila_base['formula_id']
             precio_base_criterio = fila_base['PrecioBase']
+            puntuacion_maxima    = fila_base['PuntuacionMaxima']
 
             # 3.d) Calculamos la puntuación en función de la fórmula
             if formula_id == 1:
-                # Fórmula inversa proporcional: (precio_actual, mejor_precio, presupuesto_base)
+                # Fórmula inversa proporcional: (puntuacion_maxima, oferta, mejor_oferta)
                 puntuacion_pond = inversa_proporcional(
+                    puntuacion_maxima,
                     precio_oferta,
-                    mejor_oferta,        # ahora sí pasamos el mínimo real
-                    precio_base_criterio # presup. base
+                    mejor_oferta
                 )
+
             elif formula_id == 2:
-                # Fórmula proporcional con presupuesto base: (precio_actual, mejor_precio, presupuesto_base)
+                # Fórmula proporcional con presupuesto base: (puntuacion_maxima, oferta, mejor oferta,presupuesto_base)
                 puntuacion_pond = proporcional_baja_con_presupuesto(
+                    puntuacion_maxima,
                     precio_oferta,
-                    mejor_oferta,         # corregido: mejor_precio en vez de precio_oferta
-                    precio_base_criterio  # presup. base
+                    mejor_oferta,
+                    precio_base_criterio
                 )
+
             elif formula_id == 3:
-                # Reparto proporcional: reparto_proporcional(precio_actual, lista_de_precios)
-                scores = reparto_proporcional(precio_oferta, precios_lista)
+                # Reparto proporcional: (puntuacion_total, lista_de_precios)
+                scores = reparto_proporcional(puntuacion_maxima, precios_lista)
                 try:
                     idx = precios_lista.index(precio_oferta)
                     puntuacion_pond = scores[idx]
                 except ValueError:
                     puntuacion_pond = None
+
             else:
                 puntuacion_pond = None
 

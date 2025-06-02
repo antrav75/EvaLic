@@ -139,7 +139,7 @@ def init_db(app):
     );
                      
       CREATE TABLE IF NOT EXISTS resultados (
-        puntuacionponderada INTEGER NOT NULL,
+        puntuacionponderada INTEGER,
         ofertaAB INTEGER NOT NULL,
         fechaResultado TEXT NOT NULL,
         licitacion_id INTEGER NOT NULL,
