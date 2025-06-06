@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, curren
 from services.evaluaciones_service import listar_por_evaluador
 from services.oferta_service import list_ofertas_admitidas_logic, evaluate_sobre1_logic
 from services.licitacion_service import get_licitacion as get_licitacion_logic
-from models.dao import get_db
+from models.dao import get_db, get_role_id
 
 from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
 from services.criterio_service import listar_tecnicos, listar_economicos
@@ -11,19 +11,89 @@ from services.licitacion_service import obtener_licitacion_por_id
 
 # Importamos el nuevo servicio
 from services.licitante_service import listar_licitantes_por_licitacion as list_licitantes
-
+from datetime import datetime
+from math import ceil
 
 evaluador_bp = Blueprint('evaluador', __name__, url_prefix='/evaluador')
 evaluador_bp.route('/<int:licitacion_id>/evaluar', methods=['GET', 'POST'])
 
-@evaluador_bp.route('/')
+@evaluador_bp.route('/', methods=('GET',))
 def index():
-    # Comprobar sesión y rol
     if 'user_id' not in session or session.get('role_id') != 3:
         return redirect(url_for('auth.login'))
+
     db = get_db(current_app)
+    user_id = session.get('user_id')
+
     licitaciones = listar_por_evaluador(db, session['user_id'])
-    return render_template('evaluador/index.html', licitaciones=licitaciones)
+
+       # ——— APLICAR FILTROS SEGÚN FORMULARIO ———
+    external_id  = request.args.get('external_id', '').strip()
+    title        = request.args.get('title', '').strip()
+    fecha_tipo   = request.args.get('fecha_tipo', '')
+    fecha_desde  = request.args.get('fecha_desde', '')
+    fecha_hasta  = request.args.get('fecha_hasta', '')
+
+    if external_id:
+       licitaciones = [
+           l for l in licitaciones
+           if external_id.lower() in (l['external_id'] or '').lower()
+       ]
+
+    if title:
+       licitaciones = [
+           l for l in licitaciones
+           if title.lower() in (l['title'] or '').lower()
+       ]
+
+    if fecha_tipo and fecha_desde and fecha_hasta:
+       try:
+           d_from = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+           d_to   = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+           def dentro(r):
+               val = r[fecha_tipo]
+               if not val:
+                   return False
+               # si viene como string “YYYY-MM-DD”
+               if isinstance(val, str):
+                   dt = datetime.strptime(val, '%Y-%m-%d').date()
+               else:
+                   # si ya es date o datetime
+                   dt = val if hasattr(val, 'day') else val.date()
+               return d_from <= dt <= d_to
+           licitaciones = [l for l in licitaciones if dentro(l)]
+       except ValueError:
+           # fechas mal formateadas: ignorar filtro
+           pass
+   
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config.get('LIC_PER_PAGE', 10)
+    total = len(licitaciones)
+    total_pages = ceil(total / per_page) if total else 1
+    start = (page - 1) * per_page
+    end = start + per_page
+    licitaciones = licitaciones[start:end]
+
+    responsable_id = get_role_id(db, 'responsable')
+    is_responsable = session.get('role_id') == responsable_id
+
+    return render_template(
+        'evaluador/index.html',
+        licitaciones=licitaciones,
+        is_responsable=is_responsable,
+        total_pages=total_pages,
+        current_page=page,
+        request=request
+    )
+
+# @evaluador_bp.route('/')
+# def index():
+    # Comprobar sesión y rol
+ #   if 'user_id' not in session or session.get('role_id') != 3:
+#        return redirect(url_for('auth.login'))
+#    db = get_db(current_app)
+#    licitaciones = listar_por_evaluador(db, session['user_id'])
+#    return render_template('evaluador/index.html', licitaciones=licitaciones)
 
 @evaluador_bp.route('/<int:licitacion_id>/evaluar', methods=['GET', 'POST'])
 def evaluar(licitacion_id):

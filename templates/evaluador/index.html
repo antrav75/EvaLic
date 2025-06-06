@@ -9,6 +9,32 @@
 
 <div class="card mb-4">
   <div class="card-body">
+
+       <form method="get" class="row g-3 mb-4 flex-nowrap">
+      <div class="col-md-2">
+        <input type="text" name="external_id" class="form-control" placeholder="Código externo" value="{{ request.args.get('external_id', '') }}">
+      </div>
+      <div class="col-md-2">
+        <input type="text" name="title" class="form-control" placeholder="Título" value="{{ request.args.get('title', '') }}">
+      </div>
+      <div class="col-md-2">
+        <select name="fecha_tipo" class="form-select">
+          <option value="">-- Filtrar por fecha --</option>
+          <option value="fecha_inicio" {{ 'selected' if request.args.get('fecha_tipo') == 'fecha_inicio' else '' }}>Fecha de inicio</option>
+          <option value="fecha_adjudicacion" {{ 'selected' if request.args.get('fecha_tipo') == 'fecha_adjudicacion' else '' }}>Fecha de adjudicación</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input type="date" name="fecha_desde" class="form-control" value="{{ request.args.get('fecha_desde', '') }}">
+      </div>
+      <div class="col-md-2">
+        <input type="date" name="fecha_hasta" class="form-control" value="{{ request.args.get('fecha_hasta', '') }}">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+      </div>
+    </form>
+    
     <table class="table">
       <thead>
         <tr>
