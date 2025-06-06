@@ -16,7 +16,9 @@ def generar_informe(app, licitacion_id):
     # Obtener evaluadores
     evaluadores = fetch_evaluadores(db, licitacion_id)
 
-    # Calcular puntajes totales
+    print(rows)
+    
+    # Calcular puntuaciones totales
     from collections import defaultdict
     totals = defaultdict(lambda: {'punt_tecnica': 0, 'punt_economica': 0})
     for row in rows:
@@ -26,7 +28,7 @@ def generar_informe(app, licitacion_id):
             totals[lid]['punt_tecnica'] += p
         elif row['tipo_criterio'] == 'Económico':
             totals[lid]['punt_economica'] += p
-    # Calcular puntaje global
+    # Calcular puntacion global
     for lid, vals in totals.items():
         vals['total'] = vals['punt_tecnica'] + vals['punt_economica']
 

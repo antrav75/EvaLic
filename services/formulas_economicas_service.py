@@ -14,6 +14,8 @@ def inversa_proporcional(puntuacion_maxima, oferta, mejor_oferta):
         mo = float(mejor_oferta)
     except (TypeError, ValueError):
         return None
+    # - Validación inicial-
+    # Se controla que los valores no sean 0, espcialmente of para que no se produzca una división por cero
     if pm <= 0 or of <= 0 or mo <= 0:
         return None
     try:
@@ -59,7 +61,11 @@ def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, mejor_oferta, p
     # Si la fórmula da negativo (por seguridad), devolvemos None
     return resultado if resultado >= 0 else None
 
-def reparto_proporcional(puntuacion_total, ofertas):
+def reparto_proporcional(puntuacion_total, ofertas, precio_base):
+    """
+    Reparte pto_total entre varias ofertas usando la fórmula inversa
+    proporcional basada en la 'baja' (oferta - precio_base).
+    """
     try:
         pt = float(puntuacion_total)
     except (TypeError, ValueError):
@@ -68,38 +74,39 @@ def reparto_proporcional(puntuacion_total, ofertas):
         return [None for _ in ofertas]
     if not isinstance(ofertas, (list, tuple)) or not ofertas:
         return []
-    validas = []
+
+    # Validación de precio_base
+    try:
+        pb = float(precio_base)
+    except (TypeError, ValueError):
+        return [None for _ in ofertas]
+    if pb <= 0:
+        return [None for _ in ofertas]
+
+    # Cálculo de “bajas” = oferta_i – precio_base
+    bajas = []
     for o in ofertas:
         try:
             v = float(o)
-            if v > 0:
-                validas.append(v)
+            bi = v - pb 
+            bajas.append(bi if bi > 0 else 0.0)
         except (TypeError, ValueError):
-            continue
-    if not validas:
+            bajas.append(0.0)
+
+    suma_bajas = sum(bajas)
+    if suma_bajas <= 0:
         return [None for _ in ofertas]
-    min_oferta = min(validas)
-    factores = []
-    for o in ofertas:
-        try:
-            v = float(o)
-            if v > 0:
-                factores.append(min_oferta / v)
-            else:
-                factores.append(0.0)
-        except (TypeError, ValueError):
-            factores.append(0.0)
-    suma_factores = sum(factores)
-    if suma_factores <= 0:
-        return [None for _ in ofertas]
+
+    # Reparto proporcional: P_{o_i} = P_t * (b_i / Σ b_j)
     scores = []
-    for f in factores:
+    for bi in bajas:
         try:
-            score_i = (f / suma_factores) * pt
+            score_i = (bi / suma_bajas) * pt
         except ZeroDivisionError:
             scores.append(None)
             continue
         scores.append(score_i if score_i >= 0 else None)
+
     return scores
 
 def es_oferta_anormalmente_baja(oferta, ofertas_ponderadas, presupuesto_base=None):

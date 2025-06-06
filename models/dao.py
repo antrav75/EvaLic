@@ -143,12 +143,10 @@ def init_db(app):
         ofertaAB INTEGER NOT NULL,
         fechaResultado TEXT NOT NULL,
         licitacion_id INTEGER NOT NULL,
-        usuario_id INTEGER NOT NULL,
         licitante_id INTEGER NOT NULL,
         criterio_id INTEGER NOT NULL,
-        PRIMARY KEY (licitacion_id, usuario_id, licitante_id,criterio_id)
+        PRIMARY KEY (licitacion_id, licitante_id,criterio_id)
         FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id)
-        FOREIGN KEY (usuario_id) REFERENCES users(id)
         FOREIGN KEY (licitante_id) REFERENCES licitantes(id)
         FOREIGN KEY (criterio_id) REFERENCES criterios(id)             
     );

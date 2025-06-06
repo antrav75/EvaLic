@@ -20,7 +20,6 @@ def insert_resultados_tecnicos(db, licitacion_id):
     sql = """
         INSERT INTO resultados (
             licitacion_id,
-            usuario_id,
             licitante_id,
             criterio_id,
             puntuacionponderada,
@@ -29,10 +28,9 @@ def insert_resultados_tecnicos(db, licitacion_id):
         )
         SELECT
           r.licitacion_id,
-          r.usuario_id,
           r.licitante_id,
           r.criterio_id,
-          ROUND(r.puntuacion * c.peso) AS avg_ponderado,
+          AVG(r.puntuacion * c.peso) AS avg_ponderado,
           0 AS ofertaAB,
           DATETIME('now')
         FROM evaluaciones r
@@ -127,12 +125,12 @@ def insert_resultados_economicos(db, licitacion_id):
                 )
 
             elif formula_id == 3:
-                # Reparto proporcional: (puntuacion_total, lista_de_precios)
-                scores = reparto_proporcional(puntuacion_maxima, precios_lista)
+                # Reparto proporcional: (puntuacion_total, lista_de_precios, precio_base)
+                scores = reparto_proporcional(puntuacion_maxima, precios_lista, precio_base_criterio)
                 try:
                     idx = precios_lista.index(precio_oferta)
                     puntuacion_pond = scores[idx]
-                except ValueError:
+                except (ValueError, TypeError):
                     puntuacion_pond = None
 
             else:
@@ -158,19 +156,17 @@ def insert_resultados_economicos(db, licitacion_id):
             sql_ins = """
                 INSERT OR REPLACE INTO resultados (
                     licitacion_id,
-                    usuario_id,
                     licitante_id,
                     criterio_id,
                     puntuacionponderada,
                     ofertaAB,
                     fechaResultado
-                ) VALUES (?, ?, ?, ?, ?, ?, DATETIME('now'))
+                ) VALUES (?, ?, ?, ?, ?, DATETIME('now'))
             """
             db.execute(
                 sql_ins,
                 (
                     licitacion_id,
-                    usuario_id,
                     lid,
                     cid,
                     puntuacion_sql,
@@ -198,13 +194,10 @@ def fetch_informe(db, licitacion_id):
           l.nombreempresa     AS nombreempresa,
           r.puntuacionponderada,
           r.ofertaAB,
-          r.usuario_id,
-          u.username,
           r.fechaResultado
         FROM resultados r
         JOIN criterios c ON r.criterio_id = c.id
         JOIN licitantes l ON r.licitante_id = l.id
-        LEFT JOIN users u ON r.usuario_id = u.id
         WHERE r.licitacion_id = ?
         ORDER BY c.id, r.licitante_id
     """
