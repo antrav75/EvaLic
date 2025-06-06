@@ -5,7 +5,7 @@ from flask import (
     url_for, flash, session, current_app, abort
 )
 from math import ceil
-from models.dao import get_db, get_role_id, get_formulas, guardar_evaluacion_economica, guardar_o_actualizar_evaluacion_economica
+from models.dao import get_db, get_role_id, get_formulas, guardar_o_actualizar_evaluacion_economica
 
 from services.licitacion_service import (
     list_licitaciones, get_licitacion, create_licitacion,
@@ -15,7 +15,7 @@ from services.licitacion_service import (
 from services.stage_service import advance_stage, get_current_stage_name
 from datetime import datetime
 
-from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
+from services.evaluaciones_service import obtener_evaluaciones
 from services.criterio_service import listar_economicos
 from services.resultados_service import generar_informe
 from services.licitacion_service import obtener_licitacion_por_id

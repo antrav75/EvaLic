@@ -8,6 +8,7 @@ from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluaci
 from services.criterio_service import listar_tecnicos, listar_economicos
 from services.resultados_service import generar_informe
 from services.licitacion_service import obtener_licitacion_por_id
+from services.stage_service import get_current_stage_name
 
 # Importamos el nuevo servicio
 from services.licitante_service import listar_licitantes_por_licitacion as list_licitantes
@@ -73,14 +74,11 @@ def index():
     start = (page - 1) * per_page
     end = start + per_page
     licitaciones = licitaciones[start:end]
-
-    responsable_id = get_role_id(db, 'responsable')
-    is_responsable = session.get('role_id') == responsable_id
+    print (licitaciones)
 
     return render_template(
         'evaluador/index.html',
         licitaciones=licitaciones,
-        is_responsable=is_responsable,
         total_pages=total_pages,
         current_page=page,
         request=request

@@ -38,6 +38,7 @@
     <table class="table">
       <thead>
         <tr>
+        <th>Código externo</th>  
         <th>Titulo</th>
         <th>Inicio</th>
         <th>Fin</th>
@@ -47,12 +48,22 @@
     <tbody>
       {% for lic in licitaciones %}
       <tr>
+        <td>{{ lic.external_id }}</td>
         <td>{{ lic.title }}</td>
         <td>{{ lic.fecha_inicio }}</td>
         <td>{{ lic.fecha_fin }}</td>
         <td>
-          <a href="{{ url_for('evaluador.evaluar', licitacion_id=lic.id) }}" class="btn btn-primary btn-sm">Evaluar</a>
-          <a href="{{ url_for('evaluador.informe', licitacion_id=lic.id) }}" class="btn btn-secondary btn-sm">Resultados</a>
+          {% if lic.etapa_actual == 'Sobre1' %}
+            <a href="{{ url_for('evaluador.evaluar', licitacion_id=lic.id) }}" class="btn btn-warning btn-sm">Evaluar</a>
+          {% else %} 
+            <a href="{{ url_for('evaluador.evaluar', licitacion_id=lic.id) }}" class="btn btn-secondary btn-sm disabled" tabindex="-1" aria-disabled="true">Evaluar</a>
+          {% endif %}
+          
+          {% if lic.etapa_actual == 'Cerrada' %}
+            <a href="{{ url_for('evaluador.informe', licitacion_id=lic.id) }}" class="btn btn-secondary btn-sm">Resultados</a>
+          {% else %}
+            <a href="{{ url_for('evaluador.informe', licitacion_id=lic.id) }}" class="btn btn-secondary btn-sm disabled" tabindex="-1" aria-disabled="true">Resultados</a>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}

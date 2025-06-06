@@ -2,13 +2,29 @@ from datetime import datetime
 
 def fetch_licitaciones_by_evaluator(db, evaluator_id):
     sql = '''
-        SELECT l.id, l.external_id, l.title, l.description, l.fecha_inicio, l.fecha_adjudicacion
+        SELECT 
+            l.id, 
+            l.external_id, 
+            l.title, 
+            l.description, 
+            l.fecha_inicio, 
+            l.fecha_adjudicacion,
+            sub.nombre AS etapa_actual
         FROM licitaciones l
-        JOIN licitaciones_evaluadores le ON l.id = le.licitacion_id
-        
+        INNER JOIN licitaciones_evaluadores le ON l.id = le.licitacion_id
+        LEFT JOIN (
+            SELECT e.licitacion_id, f.nombre
+            FROM etapas e
+            INNER JOIN fases f ON e.fase_id = f.id
+            WHERE e.fecha_inicio = (
+                SELECT MAX(e2.fecha_inicio)
+                FROM etapas e2
+                WHERE e2.licitacion_id = e.licitacion_id
+            )
+        ) sub ON l.id = sub.licitacion_id
         WHERE le.usuario_id = ?
         ORDER BY l.fecha_inicio DESC
-    '''
+'''
     return db.execute(sql, (evaluator_id,)).fetchall()
 
 def fetch_evaluaciones(db, licitacion_id, usuario_id):
