@@ -16,7 +16,7 @@ def generar_informe(app, licitacion_id):
     # Obtener evaluadores
     evaluadores = fetch_evaluadores(db, licitacion_id)
 
-    print(rows)
+    #print(rows)
     
     # Calcular puntuaciones totales
     from collections import defaultdict

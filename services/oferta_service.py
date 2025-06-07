@@ -16,6 +16,7 @@ def get_oferta_logic(app, licitacion_id, licitante_id):
 
 def create_oferta_logic(app, data):
     db = get_db(app)
+
     return create_oferta(
         db,
         data['licitacion_id'],

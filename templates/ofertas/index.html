@@ -1,5 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
+
+{# --- bloque de flashes --- #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  
+<div class="card mb-4">
+<div class="card-body">
 <div class="container">
   <h3>Ofertas{% if licitacion_id %} de Licitación {{ licitacion_id }}{% endif %}</h3>
 
@@ -47,23 +61,27 @@
   <div class="mb-3">
     <a href="{{ url_for('ofertas.new', licitacion_id=licitacion_id, next=request.url) }}" class="btn btn-primary">Nueva Oferta</a>
   </div>
-  <table class="table table-striped">
+  <table class="table">
     <thead>
       <tr>
+        <th>Licitante ID</th>
         <th>Empresa</th>
-        <th>Fecha de presentación</th>
+        <th>Fecha Presentación</th>
+        <th>Admitido Sobre 1</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
       {% for o in ofertas %}
         <tr>
+          <td>{{ o.licitante_id }}</td>
           <td>{{ o.nombreempresa }}</td>
           <td>{{ o.fechapresentacion }}</td>
+          <td>{{ 'Sí' if o.admitidasobre1 else 'No' }}</td>
           <td>
             <a href="{{ url_for('ofertas.edit', licitacion_id=licitacion_id, licitante_id=o.licitante_id, next=request.url) }}" class="btn btn-sm btn-warning">Editar</a>
-            <form method="post">
-              <input type="hidden" name="next" value="{{ next }}" action="{{ url_for('ofertas.delete', licitacion_id=licitacion_id, licitante_id=o.licitante_id, next=request.url) }}" style="display:inline;">
+            <form method="post" action="{{ url_for('ofertas.delete', licitacion_id=licitacion_id, licitante_id=o.licitante_id) }}" style="display:inline;">
+              <input type="hidden" name="next" value="{{ request.url }}">
               <button class="btn btn-sm btn-danger" onclick="return confirm('Eliminar oferta?');">Eliminar</button>
             </form>
           </td>
@@ -73,5 +91,7 @@
   </table>
   <a href="{{ url_for('licitaciones.edit_licitacion_route', lic_id=licitacion_id) }}" class="btn btn-secondary">Volver a Licitaciones</a>
   <a href="{{ url_for('licitantes.index', licitacion_id=licitacion_id) }}" class="btn btn-secondary ms-2">Licitantes</a>
+</div>
+</div>
 </div>
 {% endblock %}

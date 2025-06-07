@@ -70,46 +70,69 @@ def new():
             'fechapresentacion': request.form.get('fechapresentacion')
         }
 
-        try:
-            # Intentamos crear la oferta
+        # Verificar si ya existe una oferta para este licitante en la licitación
+        existente = get_oferta_logic(current_app, lic_id, request.form.get('licitante_id'))
+        
+        # Si existe, mostrar mensaje de error y volver al formulario
+        if existente:
+            print("Llegamos aquí")
+            flash('Ya existe una oferta para este licitante en la licitación.', 'danger')
+            licitantes = list_licitantes_logic(current_app)
+            return render_template('ofertas/create.html', licitacion_id=lic_id, licitantes=licitantes, next=next_url, selected_licitante_id=data['licitante_id'], fechapresentacion=data['fechapresentacion'])  
+        else:
             create_oferta_logic(current_app, data)
             flash('Oferta creada', 'success')
             return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=lic_id))
 
-        except sqlite3.IntegrityError:
-            # Capturamos el UNIQUE constraint de (licitacion_id, licitante_id)
-            flash(
-                'Error: esta empresa ya ha presentado una oferta para esta licitación.',
-                'danger'
-            )
-            # Volvemos a cargar la lista de licitantes para renderizar el form
-            licitantes = list_licitantes_logic(current_app)
-            return render_template(
-                'ofertas/create.html',
-                licitacion_id=lic_id,
-                licitantes=licitantes,
-                next=next_url,
-                # opcional: volver a poner en el form lo que ya había rellenado
-                selected_licitante_id=data['licitante_id'],
-                fechapresentacion=data['fechapresentacion']
-            )
 
-    # GET
-    licitantes = list_licitantes_logic(current_app)
-    return render_template(
-        'ofertas/create.html',
-        licitacion_id=lic_id,
-        licitantes=licitantes,
-        next=next_url
+        #try:
+            # Intentamos crear la oferta
+        #    \
+        #    try:
+        #        create_oferta_logic(current_app, data)
+        #    except sqlite3.IntegrityError:
+        #        flash('Ya existe una oferta para este licitante en la licitación.', 'danger')
+        #        licitantes = list_licitantes_logic(current_app)
+        #        return render_template('ofertas/create.html', licitacion_id=lic_id, licitantes=licitantes, next=next_url, selected_licitante_id=data['licitante_id'], fechapresentacion=data['fechapresentacion'])
+        #    flash('Oferta creada', 'success')
+        #    return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=lic_id))
+
+        #except sqlite3.IntegrityError:
+            # Capturamos el UNIQUE constraint de (licitacion_id, licitante_id)
+        #    flash(
+        #        'Error: esta empresa ya ha presentado una oferta para esta licitación.',
+        #        'danger'
+        #    )
+            # Volvemos a cargar la lista de licitantes para renderizar el form
+        #    licitantes = list_licitantes_logic(current_app)
+         #   return render_template(
+         #       'ofertas/create.html',
+         #       licitacion_id=lic_id,
+         #       licitantes=licitantes,
+         #       next=next_url,
+                # opcional: volver a poner en el form lo que ya había rellenado
+        #        selected_licitante_id=data['licitante_id'],
+        #        fechapresentacion=data['fechapresentacion']
+        #    )
+
+    else:
+        # GET
+        licitantes = list_licitantes_logic(current_app)
+        return render_template(
+            'ofertas/create.html',
+            licitacion_id=lic_id,
+            licitantes=licitantes,
+            next=next_url
     )
 
 @ofertas_bp.route('/<int:licitacion_id>/<int:licitante_id>/edit', methods=['GET', 'POST'])
 def edit(licitacion_id, licitante_id):
     next_url = request.args.get('next') or url_for('ofertas.index', licitacion_id=licitacion_id)
     oferta = get_oferta_logic(current_app, licitacion_id, licitante_id)
+    print(oferta)
     if request.method == 'POST':
         data = {
-            'licitacion_id': oferta.licitacion_id,
+            'licitacion_id': oferta['licitacion_id'],
             'licitante_id': request.form.get('licitante_id'),
             'fechapresentacion': request.form.get('fechapresentacion')
         }

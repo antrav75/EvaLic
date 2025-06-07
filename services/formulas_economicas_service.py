@@ -50,7 +50,7 @@ def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, mejor_oferta, p
     descuento_dividendo = of - pb      
     descuento_divisor  = mo - pb     
 
-    print(f"Descuento dividendo: {descuento_dividendo}, Descuento divisor: {descuento_divisor}")
+    #print(f"Descuento dividendo: {descuento_dividendo}, Descuento divisor: {descuento_divisor}")
     
     # Si el divisor es cero, no podemos dividir
     if descuento_divisor != 0:
