@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from services.licitante_service import (
     list_licitantes_logic, get_licitante_logic, create_licitante_logic,
     edit_licitante_logic, remove_licitante_logic
@@ -11,7 +11,7 @@ def index():
     # Recuperamos licitacion_id de query string
     licitacion_id = request.args.get('licitacion_id', type=int)
     # 1) Listado completo
-    all_licitantes = list_licitantes_logic(current_app)
+    all_licitantes = list_licitantes_logic()
     lics = all_licitantes
 
     # ——— Filtros “en memoria” ———
@@ -63,14 +63,14 @@ def new():
             'telefono': request.form.get('telefono'),
             'email': request.form.get('email')
         }
-        create_licitante_logic(current_app, data)
+        create_licitante_logic(data)
         flash('Licitante creado', 'success')
         return redirect(url_for('licitantes.index'))
     return render_template('licitantes/create.html')
 
 @licitantes_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 def edit(id):
-    lic = get_licitante_logic(current_app, id)
+    lic = get_licitante_logic(id)
     if request.method == 'POST':
         data = {
             'nombreempresa': request.form.get('nombreempresa'),
@@ -81,13 +81,13 @@ def edit(id):
             'telefono': request.form.get('telefono'),
             'email': request.form.get('email')
         }
-        edit_licitante_logic(current_app, id, data)
+        edit_licitante_logic( id, data)
         flash('Licitante actualizado', 'success')
         return redirect(url_for('licitantes.index'))
     return render_template('licitantes/edit.html', licitante=lic)
 
 @licitantes_bp.route('/<int:id>/delete', methods=['POST'])
 def delete(id):
-    remove_licitante_logic(current_app, id)
+    remove_licitante_logic(id)
     flash('Licitante eliminado', 'success')
     return redirect(url_for('licitantes.index'))

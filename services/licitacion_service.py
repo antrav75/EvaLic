@@ -1,4 +1,5 @@
 # services/licitacion_service.py
+from flask import current_app
 from models.licitaciones_data import (
     list_licitaciones as data_list,
     get_licitacion as data_get,
@@ -9,15 +10,19 @@ from models.licitaciones_data import (
 from models.stage_data import create_stage, delete_stages_by_tender
 from services.stage_service import get_current_stage_name
 from models.licitaciones_data import fetch_licitacion_by_id
-from models.dao import get_db
+from models.dao import get_db,get_formulas
 
-def list_licitaciones(db):
+def list_licitaciones():
+    db = get_db(current_app)
     return data_list(db)
 
-def get_licitacion(db, lic_id):
+def get_licitacion(lic_id):
+    db = get_db(current_app)
     return data_get(db, lic_id)
 
-def create_licitacion(db, external_id, title, description, fecha_inicio, fecha_adjudicacion, user_id):
+def create_licitacion( external_id, title, description, fecha_inicio, fecha_adjudicacion, user_id):
+    db = get_db(current_app)
+
     if not title:
         raise ValueError("El título es obligatorio")
     if not fecha_inicio:
@@ -28,11 +33,15 @@ def create_licitacion(db, external_id, title, description, fecha_inicio, fecha_a
     create_stage(db, lic_id, 1, fecha_inicio)
     return lic_id
 
-def edit_licitacion(db, lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion):
+def edit_licitacion( lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion):
+    db = get_db(current_app)
+
     # Actualiza la licitación
     data_update(db, lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion)
 
-def remove_licitacion(db, lic_id, user_id):
+def remove_licitacion( lic_id, user_id):
+    db = get_db(current_app)
+
     """
     Elimina una licitación solo si está en estado Borrador, 
     borrando primero sus etapas y luego la licitación.
@@ -57,18 +66,26 @@ from models.licitaciones_evaluadores_data import (
     list_evaluadores, list_evaluadores_by_licitacion, assign_evaluadores as _assign_evaluadores
 )
 
-def list_evaluadores_logic(db):
+def list_evaluadores_logic():
+    db = get_db(current_app)
     return list_evaluadores(db)
 
-def get_evaluadores_for_licitacion(db, lic_id):
+def get_evaluadores_for_licitacion( lic_id):
+    db = get_db(current_app)
     return list_evaluadores_by_licitacion(db, lic_id)
 
-def assign_evaluadores(db, lic_id, user_ids):
+def assign_evaluadores( lic_id, user_ids):
+    db = get_db(current_app)
     return _assign_evaluadores(db, lic_id, user_ids)
 
-def obtener_licitacion_por_id(app, licitacion_id):
+def obtener_licitacion_por_id(licitacion_id):
     """Devuelve la licitación como dict"""
-    db = get_db(app)
+    db = get_db(current_app)
     row = fetch_licitacion_by_id(db, licitacion_id)
     return dict(row) if row else None
 
+def get_formulas_logic():
+    """Devuelve las fórmulas de evaluación disponibles"""
+    db = get_db(current_app)
+
+    return get_formulas(db)

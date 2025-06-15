@@ -46,3 +46,84 @@ def save_evaluacion(db, licitacion_id, usuario_id, licitante_id, criterio_id, pu
     )
     db.commit()
 
+def guardar_o_actualizar_evaluacion_economica(
+        db,
+        licitacion_id,
+        licitante_id,
+        criterio_id,
+        puntuacion,
+        comentarios,
+        usuario_id
+    ):
+    """
+    Inserta o actualiza una evaluación económica.
+    La tabla 'evaluaciones' NO tiene campo 'id' ni 'puntuacionmaxima';
+    se identifica la fila por la combinación:
+      (licitacion_id, licitante_id, criterio_id, usuario_id).
+    """
+
+    # 1) Comprobar si existe ya esa evaluación
+    existing = db.execute(
+        """
+        SELECT 1
+        FROM evaluaciones
+        WHERE
+          licitacion_id = ?
+          AND licitante_id = ?
+          AND criterio_id = ?
+          AND usuario_id = ?
+        """,
+        (licitacion_id, licitante_id, criterio_id, usuario_id)
+    ).fetchone()
+
+    if existing:
+        # 2a) Si existe, actualizar los campos necesarios
+        db.execute(
+            """
+            UPDATE evaluaciones
+            SET
+              puntuacion      = ?,
+              comentarios     = ?,
+              fechaevaluacion = ?
+            WHERE
+              licitacion_id = ?
+              AND licitante_id = ?
+              AND criterio_id = ?
+              AND usuario_id = ?
+            """,
+            (
+                puntuacion,
+                comentarios,
+                datetime.now(),
+                licitacion_id,
+                licitante_id,
+                criterio_id,
+                usuario_id
+            )
+        )
+    else:
+        # 2b) Si no existe, insertar nueva fila (sin puntuacionmaxima)
+        db.execute(
+            """
+            INSERT INTO evaluaciones (
+              licitacion_id,
+              licitante_id,
+              criterio_id,
+              puntuacion,
+              comentarios,
+              usuario_id,
+              fechaevaluacion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                licitacion_id,
+                licitante_id,
+                criterio_id,
+                puntuacion,
+                comentarios,
+                usuario_id,
+                datetime.now()
+            )
+        )
+
+    db.commit()

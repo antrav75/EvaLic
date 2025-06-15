@@ -1,11 +1,12 @@
 # services/resultados_service.py
+from flask import current_app
 from models.dao import get_db
 from models.resultados_data import insert_resultados_tecnicos, insert_resultados_economicos, fetch_informe
-from services.licitacion_service import get_evaluadores_for_licitacion as fetch_evaluadores  # Assuming this exists
+from services.licitacion_service import get_evaluadores_for_licitacion
 
-def generar_informe(app, licitacion_id):
+def generar_informe(licitacion_id):
     """Genera y devuelve el informe técnico y económico, sobrescribiendo resultados previos"""
-    db = get_db(app)
+    db = get_db(current_app)
     # Inserción de resultados técnicos y económicos
     insert_resultados_tecnicos(db, licitacion_id)
     insert_resultados_economicos(db, licitacion_id)
@@ -14,7 +15,7 @@ def generar_informe(app, licitacion_id):
     # Convertir filas a dicts
     rows = [dict(r) for r in informe]
     # Obtener evaluadores
-    evaluadores = fetch_evaluadores(db, licitacion_id)
+    evaluadores = get_evaluadores_for_licitacion(licitacion_id)
 
     #print(rows)
     

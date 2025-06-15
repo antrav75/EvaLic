@@ -1,5 +1,7 @@
 # services/stage_service.py
 
+from flask import current_app
+from models.dao import get_db
 from models.stage_data import (
     get_current_stage,
     get_latest_stage_name,
@@ -9,16 +11,18 @@ from models.stage_data import (
 )
 from datetime import datetime
 
-def get_current_stage_name(db, tender_id: int) -> str:
+def get_current_stage_name( tender_id: int) -> str:
     """
     Devuelve el nombre de la fase actual para la licitación dada.
     """
+
+    db = get_db(current_app)
     name = get_latest_stage_name(db, tender_id)
     if not name:
         raise ValueError(f"No se encontró ninguna fase para la licitación {tender_id}")
     return name
 
-def advance_stage(db, tender_id: int, advance_date: str) -> str:
+def advance_stage( tender_id: int, advance_date: str) -> str:
     """
     Avanza la licitación a la siguiente fase:
       1. Comprueba que la fecha de avance sea posterior a la de inicio.
@@ -26,8 +30,10 @@ def advance_stage(db, tender_id: int, advance_date: str) -> str:
       3. Determina la fase siguiente, cierra la actual y crea la nueva.
     Devuelve el nombre de la fase a la que se ha avanzado.
     """
+    db = get_db(current_app)
     # 1) Obtener la etapa activa
-    stage = get_current_stage(db, tender_id)
+    stage = get_current_stage(db,tender_id)
+
     if not stage or not stage.get("start_date"):
         raise ValueError(f"No hay ninguna etapa activa para la licitación {tender_id}")
 

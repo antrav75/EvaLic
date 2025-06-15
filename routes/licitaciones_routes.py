@@ -5,17 +5,17 @@ from flask import (
     url_for, flash, session, current_app, abort
 )
 from math import ceil
-from models.dao import get_db, get_role_id, get_formulas, guardar_o_actualizar_evaluacion_economica
+
 
 from services.licitacion_service import (
     list_licitaciones, get_licitacion, create_licitacion,
     edit_licitacion, remove_licitacion,
-    list_evaluadores_logic, get_evaluadores_for_licitacion, assign_evaluadores
+    list_evaluadores_logic, get_evaluadores_for_licitacion, assign_evaluadores, get_formulas_logic
 )
 from services.stage_service import advance_stage, get_current_stage_name
 from datetime import datetime
 
-from services.evaluaciones_service import obtener_evaluaciones
+from services.evaluaciones_service import obtener_evaluaciones, guardar_o_actualizar_evaluacion_economica_logic
 from services.criterio_service import listar_economicos
 from services.resultados_service import generar_informe
 from services.licitacion_service import obtener_licitacion_por_id
@@ -30,10 +30,10 @@ def index():
     if 'user_id' not in session or session.get('role_id') != 2:
         return redirect(url_for('auth.login'))
 
-    db = get_db(current_app)
+    #db = get_db(current_app)
     user_id = session.get('user_id')
 
-    lic_rows = list_licitaciones(db)
+    lic_rows = list_licitaciones()
     licitaciones = [l for l in lic_rows if l['user_id'] == user_id]
 
        # ——— APLICAR FILTROS SEGÚN FORMULARIO ———
@@ -83,7 +83,7 @@ def index():
     end = start + per_page
     licitaciones = licitaciones[start:end]
 
-    responsable_id = get_role_id(db, 'responsable')
+    responsable_id = 2
     is_responsable = session.get('role_id') == responsable_id
 
     return render_template(
@@ -99,10 +99,10 @@ def index():
 def avanzar_estado(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
+    #db = get_db(current_app)
     fecha_avance = request.form.get('fecha_avance')
     try:
-        siguiente = advance_stage(db, lic_id, fecha_avance)
+        siguiente = advance_stage(lic_id, fecha_avance)
     except Exception as e:
         flash(str(e), 'error')
     else:
@@ -113,12 +113,11 @@ def avanzar_estado(lic_id):
 def create_licitacion_route():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
+    #db = get_db(current_app)
     if request.method == 'POST':
         data = request.form
         try:
             create_licitacion(
-                db,
                 data.get('external_id'),
                 data.get('title'),
                 data.get('description'),
@@ -137,30 +136,29 @@ def create_licitacion_route():
 def edit_licitacion_route(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
-    lic = get_licitacion(db, lic_id)
+    #db = get_db(current_app)
+    lic = get_licitacion(lic_id)
     if not lic:
         flash('No existe la licitación', 'error')
         return redirect(url_for('licitaciones.index'))
 
-    responsable_id = get_role_id(db, 'responsable')
+    responsable_id = 2
     is_responsable = session.get('role_id') == responsable_id
     if is_responsable and lic['user_id'] != session.get('user_id'):
         abort(403)
 
     # Obtener la etapa actual con la nueva función
-    current_stage = get_current_stage_name(db, lic_id)
+    current_stage = get_current_stage_name(lic_id)
 
     # Datos para modal Evaluadores
-    evaluadores_all = list_evaluadores_logic(db)
-    evaluadores_selected = get_evaluadores_for_licitacion(db, lic_id)
+    evaluadores_all = list_evaluadores_logic()
+    evaluadores_selected = get_evaluadores_for_licitacion(lic_id)
     selected_ids = [e['id'] for e in evaluadores_selected]
 
     if request.method == 'POST':
         data = request.form
         try:
             edit_licitacion(
-                db,
                 lic_id,
                 data.get('external_id'),
                 data.get('title'),
@@ -188,9 +186,9 @@ def edit_licitacion_route(lic_id):
 def delete_licitacion_route(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
+    #db = get_db(current_app)
     try:
-        remove_licitacion(db, lic_id, session.get('user_id'))
+        remove_licitacion( lic_id, session.get('user_id'))
     except PermissionError:
         abort(403)
     except ValueError as e:
@@ -203,16 +201,16 @@ def delete_licitacion_route(lic_id):
 def evaluadores_licitacion(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
-    lic = get_licitacion(db, lic_id)
-    current_stage = get_current_stage_name(db, lic_id)
+    #db = get_db(current_app)
+    lic = get_licitacion(lic_id)
+    current_stage = get_current_stage_name(lic_id)
     if current_stage not in ('Borrador', 'Iniciada'):
         flash('No se permite asignar evaluadores en esta fase', 'error')
         return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=lic_id))
     selected = request.form.getlist('evaluadores_selected')
     selected_ids = [int(uid) for uid in selected]
     try:
-        assign_evaluadores(db, lic_id, selected_ids)
+        assign_evaluadores( lic_id, selected_ids)
         flash('Evaluadores asignados correctamente', 'success')
     except Exception as e:
         flash(str(e), 'error')
@@ -224,17 +222,17 @@ def evaluar_sobre3(licitacion_id):
     if 'user_id' not in session or session.get('role_id') != 2:
         return redirect(url_for('auth.login'))
     usuario_id = session['user_id']
-    db = get_db(current_app)
+    #db = get_db(current_app)
 
     # 2. Obtener todas las fórmulas para mostrar nombre de fórmula
-    formulas_list = get_formulas(current_app)
+    formulas_list = get_formulas_logic()
     formulas_map = { f['id']: f['NombreFormula'] for f in formulas_list }
 
     # 3. Procesar POST: guardar o actualizar cada evaluación
     if request.method == 'POST' and request.form:
         # 3.1. Recuperar ofertas y criterios económicos desde servicios
-        ofertas_bd = list_ofertas_admitidas_logic(current_app, licitacion_id)
-        criterios_bd = listar_economicos(current_app, licitacion_id)
+        ofertas_bd = list_ofertas_admitidas_logic(licitacion_id)
+        criterios_bd = listar_economicos(licitacion_id)
 
         # 3.2. Iterar cada oferta y cada criterio para leer valores del formulario
         for oferta in ofertas_bd:
@@ -253,8 +251,7 @@ def evaluar_sobre3(licitacion_id):
                 comentarios = request.form.get(f'comentarios_{lid}_{cid}', '').strip()
 
                 # 3.3. Llamar a la función DAO sin formula_id (no lo guardamos en evaluaciones)
-                guardar_o_actualizar_evaluacion_economica(
-                    current_app,
+                guardar_o_actualizar_evaluacion_economica_logic(
                     licitacion_id,
                     lid,
                     cid,
@@ -270,14 +267,14 @@ def evaluar_sobre3(licitacion_id):
     # 4. Reconstruir datos para mostrar en GET y tras POST
 
     # 4.1. Datos generales de la licitación
-    lic = get_licitacion_logic(db, licitacion_id)
+    lic = get_licitacion_logic(licitacion_id)
 
     # 4.2. Recuperar ofertas y criterios
-    raw_ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
-    criterios = listar_economicos(current_app, licitacion_id)
+    raw_ofertas = list_ofertas_admitidas_logic( licitacion_id)
+    criterios = listar_economicos( licitacion_id)
 
     # 4.3. Obtener evaluaciones existentes de este usuario en esta licitación
-    evaluaciones = obtener_evaluaciones(current_app, licitacion_id, usuario_id)
+    evaluaciones = obtener_evaluaciones( licitacion_id, usuario_id)
 
     # 4.4. Crear mapa para buscar evaluación por (licitante_id, criterio_id)
     eval_map = {

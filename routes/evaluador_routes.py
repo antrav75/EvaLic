@@ -1,14 +1,13 @@
 from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, flash
 from services.evaluaciones_service import listar_por_evaluador
-from services.oferta_service import list_ofertas_admitidas_logic, evaluate_sobre1_logic
+from services.oferta_service import list_ofertas_admitidas_logic
 from services.licitacion_service import get_licitacion as get_licitacion_logic
-from models.dao import get_db, get_role_id
+#from models.dao import get_db
 
 from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
 from services.criterio_service import listar_tecnicos, listar_economicos
 from services.resultados_service import generar_informe
 from services.licitacion_service import obtener_licitacion_por_id
-from services.stage_service import get_current_stage_name
 
 # Importamos el nuevo servicio
 from services.licitante_service import listar_licitantes_por_licitacion as list_licitantes
@@ -23,10 +22,10 @@ def index():
     if 'user_id' not in session or session.get('role_id') != 3:
         return redirect(url_for('auth.login'))
 
-    db = get_db(current_app)
+    #db = get_db(current_app)
     user_id = session.get('user_id')
 
-    licitaciones = listar_por_evaluador(db, session['user_id'])
+    licitaciones = listar_por_evaluador( session['user_id'])
 
        # ——— APLICAR FILTROS SEGÚN FORMULARIO ———
     external_id  = request.args.get('external_id', '').strip()
@@ -100,13 +99,13 @@ def evaluar(licitacion_id):
         return redirect(url_for('auth.login'))
 
     usuario_id = session['user_id']
-    db = get_db(current_app)
+    #db = get_db(current_app)
 
     # POST: guardar o actualizar evaluaciones
     if request.method == 'POST':
-        ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
+        ofertas = list_ofertas_admitidas_logic(licitacion_id)
         # Filtrar solo criterios técnicos
-        criterios = listar_tecnicos(current_app, licitacion_id)
+        criterios = listar_tecnicos(licitacion_id)
         for oferta in ofertas:
             licitante_id = oferta['licitante_id']
             for c in criterios:
@@ -116,7 +115,6 @@ def evaluar(licitacion_id):
 
                 # y la guardamos en la BD
                 guardar_evaluacion(
-                    current_app,
                     licitacion_id,
                     usuario_id,
                     licitante_id,
@@ -129,13 +127,13 @@ def evaluar(licitacion_id):
         return redirect(url_for('evaluador.index', licitacion_id=licitacion_id))
 
     # GET: preparar datos para la vista
-    lic = get_licitacion_logic(db, licitacion_id)
+    lic = get_licitacion_logic(licitacion_id)
     # Convertir filas a dicts para permitir asignaciones
-    raw_ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
+    raw_ofertas = list_ofertas_admitidas_logic(licitacion_id)
     ofertas = [dict(of) for of in raw_ofertas]
     # Filtrar criterios técnicos
-    criterios = listar_tecnicos(current_app, licitacion_id)
-    evaluaciones = obtener_evaluaciones(current_app, licitacion_id, usuario_id)
+    criterios = listar_tecnicos(licitacion_id)
+    evaluaciones = obtener_evaluaciones(licitacion_id, usuario_id)
 
     # Mapa de evaluaciones existentes
     eval_map = {
@@ -170,16 +168,16 @@ def informe(licitacion_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    db = get_db(current_app)
+    #db = get_db(current_app)
 
     # 1) Recuperar datos de la licitación si los necesitas
-    lic = obtener_licitacion_por_id(db, licitacion_id)
+    lic = obtener_licitacion_por_id(licitacion_id)
 
     # 2) Generar resultados técnicos + económicos
-    informe_rows, evaluadores, totals = generar_informe(current_app, licitacion_id)
+    informe_rows, evaluadores, totals = generar_informe(licitacion_id)
 
     # 3) Solo licitantes que participaron
-    raw_ofertas = list_ofertas_admitidas_logic(current_app, licitacion_id)
+    raw_ofertas = list_ofertas_admitidas_logic(licitacion_id)
     # <-- Aquí ajustamos para que cada dict tenga "id" en lugar de "licitante_id"
     ofertas = [
         {'id': o['licitante_id'], 'nombreempresa': o['nombreempresa']}
@@ -188,14 +186,14 @@ def informe(licitacion_id):
 
     # 4) Cargar criterios técnicos y económicos (igual que antes)
     criterios_tecnicos = []
-    for c in listar_tecnicos(current_app, licitacion_id):
+    for c in listar_tecnicos(licitacion_id):
         criterios_tecnicos.append({
             'criterio_id': c['id'],
             'nombre_criterio': c['NombreCriterio']
         })
 
     criterios_economicos = []
-    for c in listar_economicos(current_app, licitacion_id):
+    for c in listar_economicos(licitacion_id):
         criterios_economicos.append({
             'criterio_id': c['id'],
             'nombre_criterio': c['NombreCriterio']
