@@ -3,6 +3,7 @@
 <div class="container">
   <h3>Editar Oferta</h3>
   <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="next" value="{{ next }}">
     <input type="hidden" name="licitacion_id" value="{{ oferta.licitacion_id }}">
     <div class="mb-3">

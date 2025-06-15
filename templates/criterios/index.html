@@ -17,6 +17,7 @@
   <div class="card-body">
     <h5 class="card-title">Criterios para Licitación {{ lic_id }}</h5>
     <form method="get" class="row g-2 mb-3 align-items-end">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
      <div class="col">
        <label for="filtro_nombre" class="visually-hidden">Nombre</label>
        <input

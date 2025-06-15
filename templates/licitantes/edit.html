@@ -3,6 +3,7 @@
 <div class="container">
   <h2>Editar Licitante</h2>
   <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <label for="nombreempresa">Empresa</label>
       <input type="text" name="nombreempresa" id="nombreempresa" class="form-control" value="{{ licitante.nombreempresa }}" required>
     </div>

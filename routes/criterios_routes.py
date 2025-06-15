@@ -8,7 +8,7 @@ from services.criterio_service import (
     tipos, formulas
 )
 from services.licitacion_service import get_licitacion
-#from models.dao import get_db
+
 
 criterios_bp = Blueprint('criterios', __name__, url_prefix='/criterios')
 
@@ -17,7 +17,7 @@ criterios_bp = Blueprint('criterios', __name__, url_prefix='/criterios')
 def index(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+
 
     # 1) Recuperar todos los criterios
     items = listar(lic_id)

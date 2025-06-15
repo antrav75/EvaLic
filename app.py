@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect,generate_csrf
 from config import Config
 from models.dao import init_db, close_connection
 from routes.auth_routes import auth_bp
@@ -10,9 +11,20 @@ from routes.evaluador_routes import evaluador_bp
 from routes.criterios_routes import criterios_bp
 from datetime import timedelta
 
+
+
 def create_app():
     app = Flask(__name__)
-    app.permanent_session_lifetime = timedelta(hours=1)  # Sesión permanente por 1 hora
+
+    @app.context_processor
+    def inject_csrf_token():
+        return dict(csrf_token=generate_csrf)
+    
+    app.config.from_object(Config)
+    # Inicializa CSRFProtect
+    csrf = CSRFProtect(app)
+
+    app.permanent_session_lifetime = timedelta(minutes=30)  # Sesión permanente por 30 minutos
 
     app.config.from_object(Config)
 

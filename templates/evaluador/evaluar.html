@@ -3,6 +3,7 @@
   <h1>Evaluar licitación: {{ lic.title }}</h1>
 
 <form method="post" action="">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="card mb-4">
     <div class="card-header">
       <ul class="nav nav-tabs card-header-tabs" role="tablist">

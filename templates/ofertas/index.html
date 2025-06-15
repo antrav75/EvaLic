@@ -18,6 +18,7 @@
   <h3>Ofertas{% if licitacion_id %} de Licitación {{ licitacion_id }}{% endif %}</h3>
 
   <form method="get" class="row g-2 mb-3 align-items-end">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     {%- if licitacion_id %}
       <input type="hidden" name="licitacion_id" value="{{ licitacion_id }}">
     {%- endif %}
@@ -67,7 +68,6 @@
         <th>Licitante ID</th>
         <th>Empresa</th>
         <th>Fecha Presentación</th>
-        <th>Admitido Sobre 1</th>
         <th>Acciones</th>
       </tr>
     </thead>
@@ -77,7 +77,6 @@
           <td>{{ o.licitante_id }}</td>
           <td>{{ o.nombreempresa }}</td>
           <td>{{ o.fechapresentacion }}</td>
-          <td>{{ 'Sí' if o.admitidasobre1 else 'No' }}</td>
           <td>
             <a href="{{ url_for('ofertas.edit', licitacion_id=licitacion_id, licitante_id=o.licitante_id, next=request.url) }}" class="btn btn-sm btn-warning">Editar</a>
             <form method="post" action="{{ url_for('ofertas.delete', licitacion_id=licitacion_id, licitante_id=o.licitante_id) }}" style="display:inline;">

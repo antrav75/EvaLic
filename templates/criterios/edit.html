@@ -5,6 +5,7 @@
   <div class="card-body">
     <h5 class="card-title">Editar Criterio</h5>
     <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="licitacion_id" value="{{ lic_id }}">
       <div class="mb-3">
         <label for="NombreCriterio" class="form-label">Nombre</label>

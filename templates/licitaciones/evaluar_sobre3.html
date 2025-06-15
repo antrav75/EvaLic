@@ -6,6 +6,7 @@
   <h2>Evaluación Económica: {{ lic.NombreLicitacion }}</h2>
 
   <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="card mb-4">
       <div class="card-header">
         <!-- Nav-tabs: una pestaña por empresa/oferta -->

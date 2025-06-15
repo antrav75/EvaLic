@@ -6,6 +6,7 @@
   <div class="card-body">
     <h5 class="card-title">Crear Licitación</h5>
     <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="mb-3">
         <label for="external_id" class="form-label">ID Externo</label>
         <input type="text" class="form-control" id="external_id" name="external_id" required>

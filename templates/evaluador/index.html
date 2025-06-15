@@ -9,8 +9,8 @@
 
 <div class="card mb-4">
   <div class="card-body">
-
-       <form method="get" class="row g-3 mb-4 flex-nowrap">
+    <form method="get" class="row g-3 mb-4 flex-nowrap">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="col-md-2">
         <input type="text" name="external_id" class="form-control" placeholder="Código externo" value="{{ request.args.get('external_id', '') }}">
       </div>

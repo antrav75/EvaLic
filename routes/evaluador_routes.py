@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, session, redirect, url_for, curren
 from services.evaluaciones_service import listar_por_evaluador
 from services.oferta_service import list_ofertas_admitidas_logic
 from services.licitacion_service import get_licitacion as get_licitacion_logic
-#from models.dao import get_db
 
 from services.evaluaciones_service import obtener_evaluaciones, guardar_evaluacion
 from services.criterio_service import listar_tecnicos, listar_economicos
@@ -22,7 +21,7 @@ def index():
     if 'user_id' not in session or session.get('role_id') != 3:
         return redirect(url_for('auth.login'))
 
-    #db = get_db(current_app)
+    
     user_id = session.get('user_id')
 
     licitaciones = listar_por_evaluador( session['user_id'])
@@ -83,14 +82,6 @@ def index():
         request=request
     )
 
-# @evaluador_bp.route('/')
-# def index():
-    # Comprobar sesión y rol
- #   if 'user_id' not in session or session.get('role_id') != 3:
-#        return redirect(url_for('auth.login'))
-#    db = get_db(current_app)
-#    licitaciones = listar_por_evaluador(db, session['user_id'])
-#    return render_template('evaluador/index.html', licitaciones=licitaciones)
 
 @evaluador_bp.route('/<int:licitacion_id>/evaluar', methods=['GET', 'POST'])
 def evaluar(licitacion_id):

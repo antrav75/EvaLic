@@ -43,6 +43,7 @@
 
     <!-- Filtro de búsqueda -->
     <form method="get" class="input-group mb-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <span class="input-group-text">Buscar</span>
       <input type="text" name="search" class="form-control" placeholder="usuario" value="{{ search }}">
       <select name="role_id" class="form-select">

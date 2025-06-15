@@ -5,6 +5,7 @@
 
     <!-- ====== FORMULARIO DE FILTRO ====== -->
   <form method="get" class="row g-2 mb-3 align-items-end">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     {%- if licitacion_id %}
       <input type="hidden" name="licitacion_id" value="{{ licitacion_id }}">
     {%- endif %}
