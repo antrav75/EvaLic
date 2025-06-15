@@ -1,6 +1,6 @@
 from flask import (
     Blueprint, render_template, request, redirect,
-    url_for, flash, session, current_app
+    url_for, flash, session
 )
 
 from services.criterio_service import (
@@ -8,7 +8,7 @@ from services.criterio_service import (
     tipos, formulas
 )
 from services.licitacion_service import get_licitacion
-from models.dao import get_db
+#from models.dao import get_db
 
 criterios_bp = Blueprint('criterios', __name__, url_prefix='/criterios')
 
@@ -17,10 +17,10 @@ criterios_bp = Blueprint('criterios', __name__, url_prefix='/criterios')
 def index(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
+    #db = get_db(current_app)
 
     # 1) Recuperar todos los criterios
-    items = listar(db, lic_id)
+    items = listar(lic_id)
  
     # 2) Aplicar filtros en memoria según formulario
     filtro_nombre = request.args.get('filtro_nombre', '').strip()
@@ -39,7 +39,7 @@ def index(lic_id):
         ]
 
     # Extraer solo el nombre de tipo para el desplegable
-    tipo_filtros = [t['TipoCriterio'] for t in tipos(db)]
+    tipo_filtros = [t['TipoCriterio'] for t in tipos()]
 
     return render_template(
         'criterios/index.html',
@@ -53,12 +53,12 @@ def index(lic_id):
 def create_criterio_route(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
+    #db = get_db(current_app)
     if request.method == 'POST':
         try:
             data = request.form.to_dict()
             data['licitacion_id'] = lic_id
-            crear(db, data, session['user_id'])
+            crear( data, session['user_id'])
             flash('Criterio creado exitosamente', 'success')
             # redirijo al listado de criterios
             return redirect(url_for('criterios.index', lic_id=lic_id))
@@ -67,21 +67,21 @@ def create_criterio_route(lic_id):
     return render_template(
         'criterios/create.html',
         lic_id=lic_id,
-        tipo_opts=tipos(db),
-        formula_opts=formulas(db)
+        tipo_opts=tipos(),
+        formula_opts=formulas()
     )
 
 @criterios_bp.route('/<int:lic_id>/<int:crit_id>/edit', methods=('GET','POST'))
 def edit_criterio_route(lic_id, crit_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
-    crit = obtener(db, crit_id)
+    #db = get_db(current_app)
+    crit = obtener( crit_id)
     if not crit:
         flash('Criterio no encontrado', 'danger')
     if request.method == 'POST':
         try:
-            actualizar(db, crit_id, request.form.to_dict())
+            actualizar( crit_id, request.form.to_dict())
             flash('Criterio actualizado', 'success')
             # redirijo al listado de criterios
             return redirect(url_for('criterios.index', lic_id=lic_id))
@@ -90,8 +90,8 @@ def edit_criterio_route(lic_id, crit_id):
     return render_template(
         'criterios/edit.html',
         criterio=crit,
-        tipo_opts=tipos(db),
-        formula_opts=formulas(db),
+        tipo_opts=tipos(),
+        formula_opts=formulas(),
         lic_id=lic_id
     )
 
@@ -99,9 +99,9 @@ def edit_criterio_route(lic_id, crit_id):
 def delete_criterio_route(lic_id, crit_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    db = get_db(current_app)
+    #db = get_db(current_app)
     try:
-        borrar(db, crit_id)
+        borrar(crit_id)
         flash('Criterio eliminado', 'success')
     except Exception as e:
         flash(str(e), 'danger')

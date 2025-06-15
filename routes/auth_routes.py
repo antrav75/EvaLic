@@ -1,6 +1,5 @@
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, current_app
-from models.dao import get_db
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from services.auth_service import authenticate, logout
 
 auth_bp = Blueprint('auth', __name__)
@@ -9,8 +8,7 @@ auth_bp = Blueprint('auth', __name__)
 def login():
     error = None
     if request.method == 'POST':
-        db = get_db(current_app)
-        user = authenticate(db, request.form['username'].strip(),
+        user = authenticate( request.form['username'].strip(),
                                  request.form['password'].strip())
         if user:
             session.update({
@@ -34,6 +32,5 @@ def login():
 
 @auth_bp.route('/logout')
 def do_logout():
-    db = get_db(current_app)
-    logout(db, session)
+    logout( session)
     return redirect(url_for('auth.login'))

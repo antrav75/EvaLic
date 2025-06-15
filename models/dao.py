@@ -233,6 +233,12 @@ def get_user_by_username(db, username):
         "SELECT * FROM users WHERE username=?",(username,)
     ).fetchone()
 
+def get_username_by_id(db, user_id):
+    users= db.execute(
+        "SELECT username FROM users WHERE id=?",(user_id,)
+    ).fetchone()
+    return users['username']
+
 def get_user_by_id(db, user_id):
     return db.execute(
         "SELECT * FROM users WHERE id=?",(user_id,)
