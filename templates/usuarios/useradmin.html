@@ -99,6 +99,7 @@
             <form id="del{{ user.id }}" method="post"
                   action="{{ url_for('user.delete_user_route', user_id=user.id) }}"
                   class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="button" class="btn btn-sm btn-danger"
                       onclick="confirmDelete('{{ user.username }}', 'del{{ user.id }}')">
                 Eliminar
@@ -131,6 +132,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="post" action="{{ url_for('user.add_user') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="modal-header">
           <h5 class="modal-title">Añadir Usuario</h5>
         </div>
@@ -178,6 +180,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="formEdit" method="post" action="">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="modal-header">
           <h5 class="modal-title">Editar Usuario</h5>
         </div>

@@ -52,7 +52,7 @@ def remove_licitacion( lic_id, user_id):
     # Verifica permiso del usuario
     if lic['user_id'] != user_id:
         raise PermissionError("No tienes permiso para eliminar esta licitación")
-    current_stage = get_current_stage_name(db, lic_id)
+    current_stage = get_current_stage_name(lic_id)
     if current_stage != 'Borrador':
         raise ValueError("Solo se pueden eliminar licitaciones en estado Borrador")
     # Borrar etapas asociadas

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_wtf.csrf import CSRFProtect,generate_csrf
+from flask_talisman import Talisman
 from config import Config
 from models.dao import init_db, close_connection
 from routes.auth_routes import auth_bp
@@ -23,6 +24,15 @@ def create_app():
     app.config.from_object(Config)
     # Inicializa CSRFProtect
     csrf = CSRFProtect(app)
+
+        # Forzar HTTPS y añadir HSTS
+    # content_security_policy=None desactiva CSP
+    Talisman(app, 
+             force_https=True,
+             strict_transport_security=True,
+             strict_transport_security_max_age=31536000,
+             content_security_policy=None)
+
 
     app.permanent_session_lifetime = timedelta(minutes=30)  # Sesión permanente por 30 minutos
 
