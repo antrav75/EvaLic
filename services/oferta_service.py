@@ -11,8 +11,8 @@ def list_ofertas_admitidas_logic(licitacion_id=None):
     db = get_db(current_app)
     return list_ofertas_admitidas(db, licitacion_id)
 
-def get_oferta_logic(app, licitacion_id, licitante_id):
-    db = get_db(app)
+def get_oferta_logic( licitacion_id, licitante_id):
+    db = get_db(current_app)
     return get_oferta(db, licitacion_id, licitante_id)
 
 def create_oferta_logic( data):

@@ -208,6 +208,9 @@ def evaluadores_licitacion(lic_id):
         flash('No se permite asignar evaluadores en esta fase', 'error')
         return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=lic_id))
     selected = request.form.getlist('evaluadores_selected')
+
+    print(f"Evaluadores recibidos: {selected}")  # ← imprime en consola o logs
+    
     selected_ids = [int(uid) for uid in selected]
     try:
         assign_evaluadores( lic_id, selected_ids)

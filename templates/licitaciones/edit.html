@@ -93,6 +93,7 @@
           </div>
           <div class="modal-body">
             <form id="avanzarEstadoForm" method="post" action="{{ url_for('licitaciones.avanzar_estado', lic_id=lic.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="mb-3">
                 <label for="fecha_avance" class="form-label">Fecha de avance</label>
                 <input type="date" class="form-control" id="fecha_avance" name="fecha_avance" required>
@@ -107,46 +108,47 @@
       </div>
     </div>
 
-    <!-- Modal Asignar Evaluadores -->
-    <div class="modal fade" id="evaluadoresModal" tabindex="-1" aria-labelledby="evaluadoresModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="evaluadoresModalLabel">Asignar Evaluadores</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-              <div class="col">
-                <label>Disponibles</label>
-                <select multiple id="evaluadores_available" class="form-control" style="height:200px;">
-                  {% for user in evaluadores_all %}
-                    {% if user.id not in selected_ids %}
-                      <option value="{{ user.id }}">{{ user.username }}</option>
-                    {% endif %}
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col d-flex flex-column align-items-center justify-content-center">
-                <button type="button" id="addEvaluador" class="btn btn-success mb-2">»</button>
-                <button type="button" id="removeEvaluador" class="btn btn-danger">«</button>
-              </div>
-              <div class="col">
-                <label>Asignados</label>
-                <select multiple id="evaluadores_selected" class="form-control" style="height:200px;">
-                  {% for user in evaluadores_selected %}
+<!-- Modal Asignar Evaluadores -->
+<div class="modal fade" id="evaluadoresModal" tabindex="-1" aria-labelledby="evaluadoresModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="post" action="{{ url_for('licitaciones.evaluadores_licitacion', lic_id=lic.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="evaluadoresModalLabel">Asignar Evaluadores</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col">
+              <label>Disponibles</label>
+              <select multiple name="evaluadores_avalaible" id="evaluadores_available" class="form-control" style="height:200px;">
+                {% for user in evaluadores_all %}
+                  {% if user.id not in selected_ids %}
                     <option value="{{ user.id }}">{{ user.username }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col d-flex flex-column align-items-center justify-content-center">
+              <button type="button" id="addEvaluador" class="btn btn-success mb-2">»</button>
+              <button type="button" id="removeEvaluador" class="btn btn-danger">«</button>
+            </div>
+            <div class="col">
+              <label>Asignados</label>
+              <select multiple name="evaluadores_selected" id="evaluadores_selected" class="form-control" style="height:200px;">
+                {% for user in evaluadores_selected %}
+                  <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+              </select>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="button" id="saveEvaluadores" class="btn btn-primary">Guardar</button>
-          </div>
         </div>
-      </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -155,31 +157,30 @@
 {% block scripts %}
 {{ super() }}
 <script>
-document.addEventListener('DOMContentLoaded', function(){
-  const addBtn = document.getElementById('addEvaluador'),
-        remBtn = document.getElementById('removeEvaluador'),
-        saveBtn = document.getElementById('saveEvaluadores'),
-        avail   = document.getElementById('evaluadores_available'),
-        assigned= document.getElementById('evaluadores_selected'),
-        modalEl = document.getElementById('evaluadoresModal'),
-        modal   = new bootstrap.Modal(modalEl);
+document.addEventListener('DOMContentLoaded', function () {
+  const available = document.getElementById('evaluadores_available');
+  const assigned  = document.getElementById('evaluadores_selected');
+  const addBtn    = document.getElementById('addEvaluador');
+  const remBtn    = document.getElementById('removeEvaluador');
+  const form      = document.querySelector('#evaluadoresModal form');
 
-  document.querySelector('[data-bs-target="#evaluadoresModal"]').addEventListener('click', ()=> modal.show());
-  addBtn.addEventListener('click', ()=> Array.from(avail.selectedOptions).forEach(o=> assigned.add(o)));
-  remBtn.addEventListener('click', ()=> Array.from(assigned.selectedOptions).forEach(o=> avail.add(o)));
-  saveBtn.addEventListener('click', ()=>{
-    let form = document.createElement('form');
-    form.method = 'POST';
-    form.action = "{{ url_for('licitaciones.evaluadores_licitacion', lic_id=lic.id) }}";
-    Array.from(assigned.options).forEach(option => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'evaluadores_selected';
-      input.value = option.value;
-      form.appendChild(input);
+  // Mover disponibles → asignados
+  addBtn.addEventListener('click', () => {
+    Array.from(available.selectedOptions).forEach(option => {
+      assigned.appendChild(option);
     });
-    document.body.appendChild(form);
-    form.submit();
+  });
+
+  // Mover asignados → disponibles
+  remBtn.addEventListener('click', () => {
+    Array.from(assigned.selectedOptions).forEach(option => {
+      available.appendChild(option);
+    });
+  });
+
+  // Marcar todos los asignados como selected antes de enviar
+  form.addEventListener('submit', () => {
+    Array.from(assigned.options).forEach(option => option.selected = true);
   });
 });
 </script>

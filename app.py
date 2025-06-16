@@ -25,7 +25,7 @@ def create_app():
     # Inicializa CSRFProtect
     csrf = CSRFProtect(app)
 
-        # Forzar HTTPS y añadir HSTS
+    # Forzar HTTPS y añadir HSTS
     # content_security_policy=None desactiva CSP
     Talisman(app, 
              force_https=True,

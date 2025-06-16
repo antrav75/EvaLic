@@ -74,7 +74,6 @@ def new():
         
         # Si existe, mostrar mensaje de error y volver al formulario
         if existente:
-            print("Llegamos aquí")
             flash('Ya existe una oferta para este licitante en la licitación.', 'danger')
             licitantes = list_licitantes_logic()
             return render_template('ofertas/create.html', licitacion_id=lic_id, licitantes=licitantes, next=next_url, selected_licitante_id=data['licitante_id'], fechapresentacion=data['fechapresentacion'])  
@@ -98,16 +97,25 @@ def new():
 def edit(licitacion_id, licitante_id):
     next_url = request.args.get('next') or url_for('ofertas.index', licitacion_id=licitacion_id)
     oferta = get_oferta_logic(licitacion_id, licitante_id)
-    print(oferta)
+    licitante_id_old = licitante_id,
     if request.method == 'POST':
         data = {
             'licitacion_id': oferta['licitacion_id'],
             'licitante_id': request.form.get('licitante_id'),
             'fechapresentacion': request.form.get('fechapresentacion')
         }
-        edit_oferta_logic(licitacion_id, licitante_id, data)
-        flash('Oferta actualizada', 'success')
-        return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=licitacion_id))
+
+        licitante_id=data['licitante_id'][0]
+        existente = get_oferta_logic(licitacion_id,licitante_id)
+        if existente:
+            flash('Ya existe una oferta para este licitante en la licitación.', 'danger')
+            licitantes = list_licitantes_logic()
+            return render_template('ofertas/edit.html', oferta=oferta, licitantes=licitantes, next=next_url)
+        else:     
+            edit_oferta_logic(licitacion_id, licitante_id_old[0], data)
+            flash('Oferta actualizada', 'success')
+            return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=licitacion_id))
+
     licitantes = list_licitantes_logic()
     return render_template('ofertas/edit.html', oferta=oferta, licitantes=licitantes, next=next_url)
 
