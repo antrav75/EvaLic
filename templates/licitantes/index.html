@@ -88,6 +88,7 @@
         <td>
           <a href="{{ url_for('licitantes.edit', id=lic.id) }}" class="btn btn-sm btn-warning">Editar</a>
           <form method="post" action="{{ url_for('licitantes.delete', id=lic.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm btn-danger" onclick="return confirm('Eliminar licitante?')">Eliminar</button>
           </form>
         </td>

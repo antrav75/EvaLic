@@ -1,7 +1,7 @@
 # services/stage_service.py
 
 from flask import current_app
-from models.dao import get_db
+from models.dao import get_db,get_username_by_id,log_event
 from models.stage_data import (
     get_current_stage,
     get_latest_stage_name,
@@ -22,7 +22,7 @@ def get_current_stage_name( tender_id: int) -> str:
         raise ValueError(f"No se encontró ninguna fase para la licitación {tender_id}")
     return name
 
-def advance_stage( tender_id: int, advance_date: str) -> str:
+def advance_stage( tender_id: int, advance_date: str, user_id: int) -> str:
     """
     Avanza la licitación a la siguiente fase:
       1. Comprueba que la fecha de avance sea posterior a la de inicio.
@@ -63,5 +63,9 @@ def advance_stage( tender_id: int, advance_date: str) -> str:
     # 5) Cerrar la etapa actual y abrir la nueva
     update_stage_end_date(db, tender_id, advance_date)
     create_stage(db, tender_id, next_phase["id"], advance_date)
+
+    # 6) Crear log
+    nombre_usuario = get_username_by_id(db,user_id)
+    log_event(db,nombre_usuario,"avanzar_estado",f'Licitacion_id: {tender_id} + fase_actual: {stage["fase_id"]} + fase_proxima: {next_phase["id"]} + fecha: {advance_date}')
 
     return next_phase["name"]

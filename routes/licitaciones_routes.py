@@ -102,7 +102,7 @@ def avanzar_estado(lic_id):
     #db = get_db(current_app)
     fecha_avance = request.form.get('fecha_avance')
     try:
-        siguiente = advance_stage(lic_id, fecha_avance)
+        siguiente = advance_stage(lic_id, fecha_avance,session['user_id'])
     except Exception as e:
         flash(str(e), 'error')
     else:
@@ -209,12 +209,10 @@ def evaluadores_licitacion(lic_id):
         flash('No se permite asignar evaluadores en esta fase', 'error')
         return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=lic_id))
     selected = request.form.getlist('evaluadores_selected')
-
-    print(f"Evaluadores recibidos: {selected}")  # ← imprime en consola o logs
-    
+      
     selected_ids = [int(uid) for uid in selected]
     try:
-        assign_evaluadores( lic_id, selected_ids)
+        assign_evaluadores( lic_id, selected_ids,session['user_id'])
         flash('Evaluadores asignados correctamente', 'success')
     except Exception as e:
         flash(str(e), 'error')

@@ -45,5 +45,4 @@ def remove_user(session, user_id):
 
     username = get_username_by_id(db,user_id)
     delete_user(db, user_id)
-    print(username)
     log_event(db, session['username'], 'delete_user', username)

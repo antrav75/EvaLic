@@ -84,8 +84,10 @@ def get_evaluadores_for_licitacion( lic_id):
     db = get_db(current_app)
     return list_evaluadores_by_licitacion(db, lic_id)
 
-def assign_evaluadores( lic_id, user_ids):
+def assign_evaluadores( lic_id, user_ids,user_id):
     db = get_db(current_app)
+    nombre_usuario=get_username_by_id(db,user_id)
+    log_event(db,nombre_usuario,"asignar_evaluadores",f'evaluadores_id: {user_ids}')
     return _assign_evaluadores(db, lic_id, user_ids)
 
 def obtener_licitacion_por_id(licitacion_id):

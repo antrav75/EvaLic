@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash,session
 from services.licitante_service import (
     list_licitantes_logic, get_licitante_logic, create_licitante_logic,
     edit_licitante_logic, remove_licitante_logic
@@ -8,6 +8,9 @@ licitantes_bp = Blueprint('licitantes', __name__, url_prefix='/licitantes')
 
 @licitantes_bp.route('/')
 def index():
+    if 'user_id' not in session or session.get('role_id') != 2:
+        return redirect(url_for('auth.login'))
+    
     # Recuperamos licitacion_id de query string
     licitacion_id = request.args.get('licitacion_id', type=int)
     # 1) Listado completo
@@ -53,6 +56,9 @@ def index():
 
 @licitantes_bp.route('/new', methods=['GET', 'POST'])
 def new():
+    if 'user_id' not in session or session.get('role_id') != 2:
+        return redirect(url_for('auth.login'))
+    
     if request.method == 'POST':
         data = {
             'nombreempresa': request.form.get('nombreempresa'),
@@ -63,13 +69,17 @@ def new():
             'telefono': request.form.get('telefono'),
             'email': request.form.get('email')
         }
-        create_licitante_logic(data)
+        create_licitante_logic(data,session['user_id'])
         flash('Licitante creado', 'success')
         return redirect(url_for('licitantes.index'))
     return render_template('licitantes/create.html')
 
 @licitantes_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 def edit(id):
+
+    if 'user_id' not in session or session.get('role_id') != 2:
+        return redirect(url_for('auth.login'))
+    
     lic = get_licitante_logic(id)
     if request.method == 'POST':
         data = {
@@ -81,13 +91,16 @@ def edit(id):
             'telefono': request.form.get('telefono'),
             'email': request.form.get('email')
         }
-        edit_licitante_logic( id, data)
+        edit_licitante_logic( id, data,session['user_id'])
         flash('Licitante actualizado', 'success')
         return redirect(url_for('licitantes.index'))
     return render_template('licitantes/edit.html', licitante=lic)
 
 @licitantes_bp.route('/<int:id>/delete', methods=['POST'])
 def delete(id):
-    remove_licitante_logic(id)
+    if 'user_id' not in session or session.get('role_id') != 2:
+        return redirect(url_for('auth.login'))
+    
+    remove_licitante_logic(id,session['user_id'])
     flash('Licitante eliminado', 'success')
     return redirect(url_for('licitantes.index'))

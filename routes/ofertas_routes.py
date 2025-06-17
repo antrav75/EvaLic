@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from services.oferta_service import list_ofertas_logic, get_oferta_logic, create_oferta_logic, edit_oferta_logic, remove_oferta_logic, evaluate_sobre1_logic
 from services.licitante_service import list_licitantes_logic
 from datetime import datetime
@@ -7,6 +7,9 @@ ofertas_bp = Blueprint('ofertas', __name__, url_prefix='/ofertas')
 
 @ofertas_bp.route('/')
 def index():
+    if 'user_id' not in session or session.get('role_id') != 2:
+        return redirect(url_for('auth.login'))
+
     # Recuperar licitacion_id de la query string
     licitacion_id = request.args.get('licitacion_id')
 
@@ -59,6 +62,10 @@ def index():
 
 @ofertas_bp.route('/new', methods=['GET', 'POST'])
 def new():
+    if 'user_id' not in session or session.get('role_id') != 2:
+        return redirect(url_for('auth.login'))
+    
+    user_id = session['user_id']
     lic_id     = request.args.get('licitacion_id')
     next_url   = request.args.get('next') or url_for('ofertas.index', licitacion_id=lic_id)
 
@@ -78,7 +85,7 @@ def new():
             licitantes = list_licitantes_logic()
             return render_template('ofertas/create.html', licitacion_id=lic_id, licitantes=licitantes, next=next_url, selected_licitante_id=data['licitante_id'], fechapresentacion=data['fechapresentacion'])  
         else:
-            create_oferta_logic(data)
+            create_oferta_logic(data,user_id)
             flash('Oferta creada', 'success')
             return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=lic_id))
 
@@ -112,7 +119,7 @@ def edit(licitacion_id, licitante_id):
             licitantes = list_licitantes_logic()
             return render_template('ofertas/edit.html', oferta=oferta, licitantes=licitantes, next=next_url)
         else:     
-            edit_oferta_logic(licitacion_id, licitante_id_old[0], data)
+            edit_oferta_logic(licitacion_id, licitante_id_old[0], data,session['user_id'])
             flash('Oferta actualizada', 'success')
             return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=licitacion_id))
 
@@ -123,7 +130,7 @@ def edit(licitacion_id, licitante_id):
 def delete(licitacion_id, licitante_id):
     next_url = request.args.get('next') or url_for('ofertas.index', licitacion_id=licitacion_id)
     oferta = get_oferta_logic(licitacion_id, licitante_id)
-    remove_oferta_logic(licitacion_id, licitante_id)
+    remove_oferta_logic(licitacion_id, licitante_id,session['user_id'])
     flash('Oferta eliminada', 'success')
     return redirect(request.form.get('next') or url_for('ofertas.index', licitacion_id=licitacion_id))
 
@@ -144,7 +151,7 @@ def evaluar_sobre1(licitacion_id):
             lid = o['licitante_id']
             if lid not in evaluaciones:
                 evaluaciones[lid] = False
-        evaluate_sobre1_logic(licitacion_id, evaluaciones)
+        evaluate_sobre1_logic(licitacion_id, evaluaciones,session['user_id'])
         flash('Ok', 'success')
         return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=licitacion_id))
     # GET: mostrar tabla
