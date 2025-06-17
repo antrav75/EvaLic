@@ -81,7 +81,7 @@ def edit_criterio_route(lic_id, crit_id):
         flash('Criterio no encontrado', 'danger')
     if request.method == 'POST':
         try:
-            actualizar( crit_id, request.form.to_dict())
+            actualizar( crit_id, request.form.to_dict(),session['user_id'])
             flash('Criterio actualizado', 'success')
             # redirijo al listado de criterios
             return redirect(url_for('criterios.index', lic_id=lic_id))
@@ -101,7 +101,7 @@ def delete_criterio_route(lic_id, crit_id):
         return redirect(url_for('auth.login'))
     #db = get_db(current_app)
     try:
-        borrar(crit_id)
+        borrar(lic_id,crit_id,session['user_id'])
         flash('Criterio eliminado', 'success')
     except Exception as e:
         flash(str(e), 'danger')

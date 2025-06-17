@@ -164,7 +164,8 @@ def edit_licitacion_route(lic_id):
                 data.get('title'),
                 data.get('description'),
                 data.get('fecha_inicio'),
-                data.get('fecha_adjudicacion')
+                data.get('fecha_adjudicacion'),
+                session.get('user_id')
             )
         except ValueError as e:
             flash(str(e), 'error')

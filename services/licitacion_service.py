@@ -10,7 +10,7 @@ from models.licitaciones_data import (
 from models.stage_data import create_stage, delete_stages_by_tender
 from services.stage_service import get_current_stage_name
 from models.licitaciones_data import fetch_licitacion_by_id
-from models.dao import get_db,get_formulas
+from models.dao import get_db,get_formulas,get_username_by_id,log_event
 
 def list_licitaciones():
     db = get_db(current_app)
@@ -31,13 +31,21 @@ def create_licitacion( external_id, title, description, fecha_inicio, fecha_adju
     lic_id = data_create(db, external_id, title, description, fecha_inicio, fecha_adjudicacion, user_id)
     # 2) Crear la etapa inicial (fase "Borrador", id=1)
     create_stage(db, lic_id, 1, fecha_inicio)
+    # 3) Crear registro en el log de licitación creada
+    nombre_usuario = get_username_by_id(db,user_id)
+    log_event(db,nombre_usuario,"crear_licitacion",f'Id: {lic_id} External_ID: {external_id} Titulo: {title}')
+
     return lic_id
 
-def edit_licitacion( lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion):
+def edit_licitacion( lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion, user_id):
     db = get_db(current_app)
 
     # Actualiza la licitación
     data_update(db, lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion)
+
+    # Crear registro en el log de licitación editada
+    nombre_usuario = get_username_by_id(db,user_id)
+    log_event(db,nombre_usuario,"editar_licitacion",f'Id: {lic_id} External_ID: {external_id} Titulo: {title}')
 
 def remove_licitacion( lic_id, user_id):
     db = get_db(current_app)
@@ -59,7 +67,9 @@ def remove_licitacion( lic_id, user_id):
     delete_stages_by_tender(db, lic_id)
     # Borrar la licitación
     data_delete(db, lic_id)
-
+    # Crear registro en el log de licitación borrada
+    nombre_usuario = get_username_by_id(db,user_id)
+    log_event(db,nombre_usuario,"borrar_licitacion",f'Id: {lic_id}')
 
 # Funciones para evaluadores de licitaciones
 from models.licitaciones_evaluadores_data import (

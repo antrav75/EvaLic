@@ -66,14 +66,13 @@ def index():
            pass
    
     page = request.args.get('page', 1, type=int)
-    per_page = current_app.config.get('LIC_PER_PAGE', 10)
+    per_page = current_app.config.get('LIC_PER_PAGE', 5)
     total = len(licitaciones)
     total_pages = ceil(total / per_page) if total else 1
     start = (page - 1) * per_page
     end = start + per_page
     licitaciones = licitaciones[start:end]
-    print (licitaciones)
-
+    
     return render_template(
         'evaluador/index.html',
         licitaciones=licitaciones,
