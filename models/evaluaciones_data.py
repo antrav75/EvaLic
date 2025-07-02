@@ -1,5 +1,12 @@
 from datetime import datetime
 
+# Función: fetch_licitaciones_by_evaluator
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   evaluator_id (entero): Identificador del evaluador.
+# Descripción: Esta función obtiene los datos necesario de la licitaciones en las que participa
+#              el evaluador con el identificador que se ha pasado.
+# Retorna: Lista de licitaciones
 def fetch_licitaciones_by_evaluator(db, evaluator_id):
     sql = '''
         SELECT 
@@ -27,6 +34,14 @@ def fetch_licitaciones_by_evaluator(db, evaluator_id):
 '''
     return db.execute(sql, (evaluator_id,)).fetchall()
 
+# Función: fetch_evaluaciones
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   licitacion_id (entero): Identificador de la licitación que se está evaluando.
+#   usuario_id (entero): Descripción del parámetro usuario_id.
+# Descripción: A partir del identificador de la licitación y del identificador del usuario que evalua se obtiene
+#              el listado de evaluaciones en las que participa.
+# Retorna: Lista de evaluaciones
 def fetch_evaluaciones(db, licitacion_id, usuario_id):
     sql = """
         SELECT e.licitacion_id,e.usuario_id,e.licitante_id, e.criterio_id, e.puntuacion, c.preciobase, e.fechaevaluacion, e.comentarios,c.puntuacionmaxima
@@ -36,6 +51,18 @@ def fetch_evaluaciones(db, licitacion_id, usuario_id):
     return db.execute(sql, (licitacion_id, usuario_id)).fetchall()
 
 
+# Función: save_evaluacion
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   licitacion_id (entero): Identificador de la licitación que se está evaluando.
+#   usuario_id (entero): Descripción del parámetro usuario_id.
+#   licitante_id (entero): Identificador del licitante al que pertenece la oferta.
+#   criterio_id (entero): Identificador del criterio que es evaluado.
+#   puntuacion (entero): Puntuación asignada a la evaluación del criterio.
+#   comentarios (cadena): Comentarios para aclarar la evaluación.
+# Descripción: Esta función almacena en la tabla evaluaciones la evaluación realizada sobre una 
+#              determinada oferta dentro del contexto de una evaluación.
+# Retorna: Ninguno
 def save_evaluacion(db, licitacion_id, usuario_id, licitante_id, criterio_id, puntuacion, comentarios):
     db.execute(
         """
@@ -46,6 +73,20 @@ def save_evaluacion(db, licitacion_id, usuario_id, licitante_id, criterio_id, pu
     )
     db.commit()
 
+# Función: guardar_o_actualizar_evaluacion_economica
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   licitacion_id (entero): Identificador de la licitación de la que se va a guardar la evaluacion.
+#   licitante_id (entero): Identificador del licitante que ha presentado la oferta.
+#   criterio_id (entero): Criterio a evaluar.
+#   puntuacion (entero): Puntuación otorgada por el evaluador.
+#   formula_id (entero): identificador de la fórmula económica con la que se va a evaluar.
+#   comentarios (cadena): Comentarios para aclarar la evaluación.
+#   usuario_id (entero): Usuario con perfil evaluador o responsable que evalua la licitación.
+#   puntuacionmaxima (entero): Puntuacion máxima a calcular cuando se usa una fórmula económica.
+# Descripción: Esta función guarda o actualiza una evaluación económica de una oferta realizada a una licitación
+#              Primero comprueba si existe y si no existe la crea, si existe la modifica.
+# Retorna: desconocido - Descripción del valor devuelto.
 def guardar_o_actualizar_evaluacion_economica(
         db,
         licitacion_id,

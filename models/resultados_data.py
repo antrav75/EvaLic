@@ -3,6 +3,12 @@ from datetime import datetime
 from flask import g
 
 
+# Función: delete_resultados
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   licitacion_id (entero): Identificador de la licitación que queremos borrar los resultados.
+# Descripción: Esta función borra los resultados de una determinada licitación de la tabla de resultados.
+# Retorna: Ninguno
 def delete_resultados(db, licitacion_id):
     """
     Elimina resultados (técnicos y económicos) previos de una licitación.
@@ -11,6 +17,14 @@ def delete_resultados(db, licitacion_id):
     db.execute(sql, (licitacion_id,))
     db.commit()
 
+# Función: insert_resultados_tecnicos
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   licitacion_id (entero): Identificador de la licitación que queremos obtener los resultados económicos.
+# Descripción: Esta función calcula los resultados de los criterios técnicos de una licitación dada.
+#              Para ello obtiene la media ponderada sobre la tabla de evaluaciones realizadas por los
+#              usuarios con rol evaluador y la almacena en la tabla resultados.
+# Retorna: Ninguno
 def insert_resultados_tecnicos(db, licitacion_id):
     """
     Inserta (o reemplaza) los resultados técnicos de la licitación,
@@ -43,6 +57,16 @@ def insert_resultados_tecnicos(db, licitacion_id):
     db.execute(sql, (licitacion_id,))
     db.commit()
 
+# Función: insert_resultados_economicos
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   licitacion_id (entero): Identificador de la licitación que queremos obtener los resultados económicos.
+# Descripción: Esta función calcula los resultados de los criterios económicos de una licitación dada.
+#              Para ello partimos de la evaluación realizada por el usuario responsable y agrupamos por 
+#              criterio. De cada fila vamos a extraer los valores necesarios para aplicar las fórmulas, 
+#              y aplicamos la fórmula definida en el criterio, obteniendo un valor numérico. Por último los
+#              datos a mostrar se insertarán en la tabla resultados.
+# Retorna: Ninguno
 def insert_resultados_economicos(db, licitacion_id):
     """
     Inserta (o reemplaza) los resultados económicos de la licitación.
@@ -176,6 +200,13 @@ def insert_resultados_economicos(db, licitacion_id):
 
     db.commit()
     
+# Función: fetch_informe
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   licitacion_id (entero): Identificador de la licitación que estamos tratando.
+# Descripción: Esta función obtiene de la tabla resultados los datos necesarios de una licitación
+#              para generar el informe que se mostrará al final.
+# Retorna: Lista de datos de resultados
 def fetch_informe(db, licitacion_id):
     """
     Recupera todos los resultados (técnicos y económicos) para la licitación.

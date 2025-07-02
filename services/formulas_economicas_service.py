@@ -7,6 +7,13 @@ Fórmulas para evaluación de ofertas económicas:
  - comprobación anormal baja Art.85 RGLCAP (umbral según nº ofertas)
 """
 
+# Función: inversa_proporcional
+# Parámetros:
+#   puntuacion_maxima (desconocido): Descripción del parámetro puntuacion_maxima.
+#   oferta (desconocido): Descripción del parámetro oferta.
+#   mejor_oferta (desconocido): Descripción del parámetro mejor_oferta.
+# Descripción: Breve descripción de lo que hace la función inversa_proporcional.
+# Retorna: desconocido - Descripción del valor devuelto.
 def inversa_proporcional(puntuacion_maxima, oferta, mejor_oferta):
     try:
         pm = float(puntuacion_maxima)
@@ -24,6 +31,14 @@ def inversa_proporcional(puntuacion_maxima, oferta, mejor_oferta):
         return None
     return resultado if resultado >= 0 else None
 
+# Función: proporcional_baja_con_presupuesto
+# Parámetros:
+#   puntuacion_maxima (desconocido): Descripción del parámetro puntuacion_maxima.
+#   oferta (desconocido): Descripción del parámetro oferta.
+#   mejor_oferta (desconocido): Descripción del parámetro mejor_oferta.
+#   presupuesto_base (desconocido): Descripción del parámetro presupuesto_base.
+# Descripción: Breve descripción de lo que hace la función proporcional_baja_con_presupuesto.
+# Retorna: desconocido - Descripción del valor devuelto.
 def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, mejor_oferta, presupuesto_base):
     try:
         pm = float(puntuacion_maxima)
@@ -61,6 +76,13 @@ def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, mejor_oferta, p
     # Si la fórmula da negativo (por seguridad), devolvemos None
     return resultado if resultado >= 0 else None
 
+# Función: reparto_proporcional
+# Parámetros:
+#   puntuacion_total (desconocido): Descripción del parámetro puntuacion_total.
+#   ofertas (desconocido): Descripción del parámetro ofertas.
+#   precio_base (desconocido): Descripción del parámetro precio_base.
+# Descripción: Breve descripción de lo que hace la función reparto_proporcional.
+# Retorna: desconocido - Descripción del valor devuelto.
 def reparto_proporcional(puntuacion_total, ofertas, precio_base):
     """
     Reparte pto_total entre varias ofertas usando la fórmula inversa
@@ -109,6 +131,13 @@ def reparto_proporcional(puntuacion_total, ofertas, precio_base):
 
     return scores
 
+# Función: es_oferta_anormalmente_baja
+# Parámetros:
+#   oferta (desconocido): Descripción del parámetro oferta.
+#   ofertas_ponderadas (desconocido): Descripción del parámetro ofertas_ponderadas.
+#   presupuesto_base (desconocido): Descripción del parámetro presupuesto_base.
+# Descripción: Breve descripción de lo que hace la función es_oferta_anormalmente_baja.
+# Retorna: desconocido - Descripción del valor devuelto.
 def es_oferta_anormalmente_baja(oferta, ofertas_ponderadas, presupuesto_base=None):
     try:
         of = float(oferta)

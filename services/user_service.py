@@ -5,6 +5,13 @@ from models.dao import (
     add_user, update_user, delete_user, log_event,get_username_by_id,get_user_by_username
 )
 
+# Función: list_users
+# Parámetros:
+#   search (desconocido): Descripción del parámetro search.
+#   role_id (desconocido): Descripción del parámetro role_id.
+#   page (desconocido): Descripción del parámetro page.
+# Descripción: Breve descripción de lo que hace la función list_users.
+# Retorna: desconocido - Descripción del valor devuelto.
 def list_users(search, role_id, page):
     db = get_db(current_app)
     users, total, pages = fetch_users(db, search, role_id, page)
@@ -16,6 +23,16 @@ def list_users(search, role_id, page):
         'pages': pages
     }
 
+# Función: create_user
+# Parámetros:
+#   session (desconocido): Descripción del parámetro session.
+#   username (desconocido): Descripción del parámetro username.
+#   email (desconocido): Descripción del parámetro email.
+#   password (desconocido): Descripción del parámetro password.
+#   role_id (desconocido): Descripción del parámetro role_id.
+#   active (desconocido): Descripción del parámetro active.
+# Descripción: Breve descripción de lo que hace la función create_user.
+# Retorna: desconocido - Descripción del valor devuelto.
 def create_user( session, username, email, password, role_id, active=True):
     db = get_db(current_app)
 
@@ -28,6 +45,17 @@ def create_user( session, username, email, password, role_id, active=True):
     else:
         raise ValueError("El nombre de usuario ya existe")
     
+# Función: edit_user
+# Parámetros:
+#   session (desconocido): Descripción del parámetro session.
+#   user_id (desconocido): Descripción del parámetro user_id.
+#   username (desconocido): Descripción del parámetro username.
+#   email (desconocido): Descripción del parámetro email.
+#   password (desconocido): Descripción del parámetro password.
+#   role_id (desconocido): Descripción del parámetro role_id.
+#   active (desconocido): Descripción del parámetro active.
+# Descripción: Breve descripción de lo que hace la función edit_user.
+# Retorna: desconocido - Descripción del valor devuelto.
 def edit_user(session, user_id, username, email, password, role_id, active):
     db = get_db(current_app)
 
@@ -40,6 +68,12 @@ def edit_user(session, user_id, username, email, password, role_id, active):
     else:
         raise ValueError("El nombre de usuario ya existe")
     
+# Función: remove_user
+# Parámetros:
+#   session (desconocido): Descripción del parámetro session.
+#   user_id (desconocido): Descripción del parámetro user_id.
+# Descripción: Breve descripción de lo que hace la función remove_user.
+# Retorna: desconocido - Descripción del valor devuelto.
 def remove_user(session, user_id):
     db = get_db(current_app)
 

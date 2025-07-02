@@ -14,10 +14,18 @@ from datetime import timedelta
 
 
 
+# Función: create_app
+# Parámetros: Ninguno
+# Descripción: Función principal para ejecutar la aplicación 
+# Retorna: Ninguno
 def create_app():
     app = Flask(__name__)
 
     @app.context_processor
+    # Función: inject_csrf_token
+    # Parámetros: Ninguno
+    # Descripción: Función para generar un token para evitar ataques bbasado en CSRF.
+    # Retorna: diccionario con el valor del token
     def inject_csrf_token():
         return dict(csrf_token=generate_csrf)
     
@@ -39,8 +47,17 @@ def create_app():
     app.config.from_object(Config)
 
     @app.context_processor
+    # Función: utility_processor
+    # Parámetros: Ninguno
+    # Descripción: Función auxiliar para ejecutar la aplicación.
+    # Retorna: diccionario con la URL de acceso para otra página.
     def utility_processor():
         from flask import request, url_for
+        # Función: url_for_other_page
+        # Parámetros:
+        #   page (cadena): Pagina a acceder.
+        # Descripción: Accede a otra página.
+        # Retorna: diccionario con la URL de la otra página.
         def url_for_other_page(page):
             args = request.args.copy()
             args['page'] = page

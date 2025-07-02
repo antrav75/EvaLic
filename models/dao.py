@@ -5,6 +5,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import math
 from datetime import datetime
 
+# Función: get_db
+# Parámetros:
+#   app (cadena): Nombre de la aplicación 
+# Descripción: La función get_db obtiene el nombre de la base de  datos asociado a la aplicación del parametro app.
+# Retorna: desconocido - Descripción del valor devuelto.
 def get_db(app):
     db = getattr(g, '_database', None)
     if db is None:
@@ -12,11 +17,24 @@ def get_db(app):
         db.row_factory = sqlite3.Row
     return db
 
+# Función: close_connection
+# Parámetros:
+#   exception (entero): Valor de vuelto para indicar si todo ha salido bien o no.
+# Descripción: Cierra la conexión de la aplicación web
+# Retorna: Ninguno
 def close_connection(exception):
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
 
+# Función: init_db
+# Parámetros:
+#   app (cadena): Nombre de la aplicación.
+# Descripción: Esta función inicializa los valores de la Base de Datos en caso de que no exista. Se
+#              crea la base de datos, se crean las tablas necesarias para la aplicación y se crean
+#              los valores por defecto para la ejecución perfecta de la aplicación desde su primera
+#              ejecución.
+# Retorna: Ninguno.
 def init_db(app):
     db = get_db(app)
     db.executescript("""
@@ -198,11 +216,20 @@ def init_db(app):
         )
         db.commit()
 
-# ... resto de funciones (no modificadas)
-
+# Función: get_roles
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+# Descripción: Obtiene los datos de la tabla roles para la lista.
+# Retorna: lista de valores de la tabla roles
 def get_roles(db):
     return db.execute("SELECT id,description FROM roles").fetchall()
 
+# Función: get_role_id
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   description (cadena): Descripción del role.
+# Descripción: Obtiene el identificador a partir de la descripción del rol
+# Retorna: Identificador (Entero)
 def get_role_id(db, description):
     row = db.execute(
         "SELECT id FROM roles WHERE LOWER(description)=LOWER(?)",
@@ -210,6 +237,17 @@ def get_role_id(db, description):
     ).fetchone()
     return row['id'] if row else None
 
+# Función: fetch_users
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   search (cadena): Cadena de búsqueda para el filtro.
+#   role_id (entero): Identificador del rol.
+#   page (entero): Valor de página para la identificación.
+#   per_page (entero): Número de usuarios por página que se pueden mostrar.
+# Descripción: Esta función se encarga de obtener de la tabla de usuarios los
+#              valores de los usuarios que se van a mostrar paginados de 5 
+#              en 5.
+# Retorna: lista de datos de los usuarios, total y número de páginas. 
 def fetch_users(db, search='', role_id=None, page=1, per_page=5):
     base = "FROM users u LEFT JOIN roles r ON u.role_id=r.id WHERE 1=1"
     params = []
@@ -228,22 +266,50 @@ def fetch_users(db, search='', role_id=None, page=1, per_page=5):
     ).fetchall()
     return data, total, pages
 
+# Función: get_user_by_username
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   username (cadena): Nombre de usuario.
+# Descripción: Retorna los datos de un usuario a partir del nombre de usuario consultado.
+# Retorna: lista de datos del usuario.
 def get_user_by_username(db, username):
     return db.execute(
         "SELECT * FROM users WHERE username=?",(username,)
     ).fetchone()
 
+# Función: get_username_by_id
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   user_id (entero): Identificador del usuario.
+# Descripción: Obtiene el nombre del usuario a partir del identificador consultado.
+# Retorna: lista de datos del usuario.
 def get_username_by_id(db, user_id):
     users= db.execute(
         "SELECT username FROM users WHERE id=?",(user_id,)
     ).fetchone()
     return users['username']
 
+# Función: get_user_by_id
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   user_id (entero): Identificador del usuario.
+# Descripción: Obtiene todos los datos del usuario a partir del identificador consultado.
+# Retorna: desconocido - Lista de datos.
 def get_user_by_id(db, user_id):
     return db.execute(
         "SELECT * FROM users WHERE id=?",(user_id,)
     ).fetchone()
 
+# Función: add_user
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   username (cadena): Nombre del usuario a crear.
+#   email (cadena): Correo electrónico del usuario a crear.
+#   password_hash (cadena): Hash obtenido a partir de la contraseña .
+#   role_id (entero): Identificador del rol asignado.
+#   active (entero): Indica si el usuario está activo para el login o no.
+# Descripción: Está función se utiliza para crear un usuario en la tabla de usuarios.
+# Retorna: Ninguno
 def add_user(db, username, email, password_hash, role_id, active=True):
     cur = db.execute(
         "INSERT INTO users(username,email,password,role_id,active) VALUES(?,?,?,?,?)",
@@ -252,6 +318,17 @@ def add_user(db, username, email, password_hash, role_id, active=True):
     db.commit()
     return cur.lastrowid
 
+# Función: update_user
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   user_id (entero): Identificador del usuario a editar.
+#   username (cadena): Nombre del usuario a crear.
+#   email (cadena): Correo electrónico del usuario a crear.
+#   password_hash (cadena): Hash obtenido a partir de la contraseña .
+#   role_id (entero): Identificador del rol asignado.
+#   active (entero): Indica si el usuario está activo para el login o no.
+# Descripción: Está función se utiliza para cmodficar los datos de  un usuario en la tabla de usuarios.
+# Retorna: Ninguno
 def update_user(db, user_id, username, email, password_hash, role_id, active):
     if password_hash:
         db.execute(
@@ -265,10 +342,27 @@ def update_user(db, user_id, username, email, password_hash, role_id, active):
         )
     db.commit()
 
+# Función: delete_user
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   user_id (entero): Identificador del usuario a borrar.
+# Descripción: Esta función borra los datos del usuario seleccionado.
+# Retorna: Ninguno
 def delete_user(db, user_id):
     db.execute("DELETE FROM users WHERE id=?", (user_id,))
     db.commit()
 
+# Función: log_event
+# Parámetros:
+#   db (conexión): Nombre de la conexión a la base de datos.
+#   nombreUsuario (cadena): Nombre del usuario que ha generado el evento.
+#   TipoEvento (cadena): Tipo de evento registrado.
+#   DescripcionEvento (cadena): Descripción del evento registrado.
+#   success (entero): Indica si el evento se almacenó correctamente.
+# Descripción: La función log_event registra las acciones o eventos que los usuarios
+#              van realizando en la aplicación como el CRUD de usuarios, criterios,
+#              licitaciones, etc. por si hay que realizar auditoría. 
+# Retorna: Ninguno
 def log_event(db, nombreUsuario, TipoEvento, DescripcionEvento,success=1):
     db.execute(
         """INSERT INTO auditoria
@@ -280,6 +374,12 @@ def log_event(db, nombreUsuario, TipoEvento, DescripcionEvento,success=1):
     db.commit()
 
 
+# Función: list_ofertas_by_licitacion
+# Parámetros:
+#   app (cadena): Nombre de la aplicación.
+#   licitacion_id (entero): identificador de la licitación de la que se va a obtener las ofertas.
+# Descripción: Esta función obtiene a partir de una licitación las ofertas que se han presentado.
+# Retorna: Lista de ofertas.
 def list_ofertas_by_licitacion(app, licitacion_id):
     db = get_db(app)
     query = """
@@ -290,6 +390,14 @@ def list_ofertas_by_licitacion(app, licitacion_id):
     """
     return db.execute(query, (licitacion_id,)).fetchall()
 
+# Función: update_admitidasobre1
+# Parámetros:
+#   db (desconocido): Descripción del parámetro db.
+#   licitacion_id (desconocido): Descripción del parámetro licitacion_id.
+#   licitante_id (desconocido): Descripción del parámetro licitante_id.
+#   admitido (desconocido): Descripción del parámetro admitido.
+# Descripción: Breve descripción de lo que hace la función update_admitidasobre1.
+# Retorna: desconocido - Descripción del valor devuelto.
 def update_admitidasobre1(db, licitacion_id, licitante_id, admitido):
     db.execute(
         "UPDATE ofertas SET admitidasobre1 = ? WHERE licitacion_id = ? AND licitante_id = ?",
@@ -297,47 +405,11 @@ def update_admitidasobre1(db, licitacion_id, licitante_id, admitido):
     )
     db.commit()
 
-
-def guardar_evaluacion_economica(app, licitacion_id, licitante_id, criterio_id, puntuacion, formula_id, comentarios, usuario_id,puntuacionmaxima):
-    db = get_db(app)
-    cur = db.cursor()
-
-    cur.execute("""
-        SELECT 1 FROM evaluaciones
-        WHERE licitacion_id = ? AND licitante_id = ? AND criterio_id = ?
-    """, (licitacion_id, licitante_id, criterio_id))
-
-    exists = cur.fetchone()
-
-    if exists:
-        cur.execute("""
-            UPDATE evaluaciones
-            SET puntuacion = ?, formula_id = ?, comentarios = ?, usuario_id = ?
-            WHERE licitacion_id = ? AND licitante_id = ? AND criterio_id = ? 
-        """, (puntuacion, formula_id, comentarios, usuario_id,
-              licitacion_id, licitante_id, criterio_id))
-    else:
-        cur.execute("""
-            INSERT INTO evaluaciones (
-                licitacion_id, licitante_id, criterio_id,
-                puntuacion, formula_id, comentarios, usuario_id, fechaevaluacion
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (licitacion_id, licitante_id, criterio_id, puntuacion, formula_id, comentarios, usuario_id, datetime.now()))
-
-    db.commit()
-
-def get_db(app):
-    """
-    Devuelve una conexión SQLite en g.sqlite_db.
-    """
-    if 'sqlite_db' not in g:
-        g.sqlite_db = sqlite3.connect(
-            app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.sqlite_db.row_factory = sqlite3.Row
-    return g.sqlite_db
-
+# Función: get_formulas
+# Parámetros:
+#   db (desconocido): Descripción del parámetro db.
+# Descripción: Breve descripción de lo que hace la función get_formulas.
+# Retorna: desconocido - Descripción del valor devuelto.
 def get_formulas(db):
     """
     Recupera todas las fórmulas de la tabla formulas.
