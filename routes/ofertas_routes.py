@@ -152,7 +152,7 @@ def evaluar_sobre1(licitacion_id):
             if lid not in evaluaciones:
                 evaluaciones[lid] = False
         evaluate_sobre1_logic(licitacion_id, evaluaciones,session['user_id'])
-        flash('Ok', 'success')
+        flash('Evaluación sobre 1 actualizada', 'success')
         return redirect(url_for('licitaciones.edit_licitacion_route', lic_id=licitacion_id))
     # GET: mostrar tabla
     ofertas = list_ofertas_logic(licitacion_id)
