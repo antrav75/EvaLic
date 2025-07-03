@@ -24,7 +24,7 @@ def create_app():
     @app.context_processor
     # Función: inject_csrf_token
     # Parámetros: Ninguno
-    # Descripción: Función para generar un token para evitar ataques bbasado en CSRF.
+    # Descripción: Función para generar un token para evitar ataques basados en CSRF.
     # Retorna: diccionario con el valor del token
     def inject_csrf_token():
         return dict(csrf_token=generate_csrf)

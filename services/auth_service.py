@@ -4,10 +4,12 @@ from models.dao import get_user_by_username, log_event,get_db
 
 # Función: authenticate
 # Parámetros:
-#   username (desconocido): Descripción del parámetro username.
-#   password (desconocido): Descripción del parámetro password.
-# Descripción: Breve descripción de lo que hace la función authenticate.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   username (cadena): Nombre del usuario que quiere acceder al sistema.
+#   password (cadena): Contraseña del usuario que quiere acceder al sistema.
+# Descripción: Esta función se encarga de validar si el usuario y la contraseña introducidos
+#              están definidos en el sistema, permitiendo el acceso si es así y denegandolo si
+#              no se encuentra registrador.
+# Retorna: indetificador del usuario (entero).
 def authenticate(username, password):
     db = get_db(current_app)
     user = get_user_by_username(db, username)
@@ -21,9 +23,9 @@ def authenticate(username, password):
 
 # Función: logout
 # Parámetros:
-#   session (desconocido): Descripción del parámetro session.
-# Descripción: Breve descripción de lo que hace la función logout.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   session (desconocido): Identificador de sesión del sistema.
+# Descripción: Esta función se encarga de cerrar la sesión abierta en el sistema .
+# Retorna: Ninguno.
 def logout( session):
     db = get_db(current_app)
     if 'user_id' in session:

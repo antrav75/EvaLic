@@ -14,31 +14,33 @@ from models.dao import get_db,get_formulas,get_username_by_id,log_event
 
 # Función: list_licitaciones
 # Parámetros: Ninguno
-# Descripción: Breve descripción de lo que hace la función list_licitaciones.
-# Retorna: desconocido - Descripción del valor devuelto.
+# Descripción: Obtiene los datos de todas las licitaciones del sistema.
+# Retorna: lista con los datos de todas las licitaciones
 def list_licitaciones():
     db = get_db(current_app)
     return data_list(db)
 
 # Función: get_licitacion
 # Parámetros:
-#   lic_id (desconocido): Descripción del parámetro lic_id.
-# Descripción: Breve descripción de lo que hace la función get_licitacion.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   lic_id (entero): Identificador de licitación para buscar los datos.
+# Descripción: Esta función busca los datos de una licitación concreta cuyo
+#              identificador se ha proporcionado en el parámetro.
+# Retorna: lista de datos de la licitación.
 def get_licitacion(lic_id):
     db = get_db(current_app)
     return data_get(db, lic_id)
 
 # Función: create_licitacion
 # Parámetros:
-#   external_id (desconocido): Descripción del parámetro external_id.
-#   title (desconocido): Descripción del parámetro title.
-#   description (desconocido): Descripción del parámetro description.
-#   fecha_inicio (desconocido): Descripción del parámetro fecha_inicio.
-#   fecha_adjudicacion (desconocido): Descripción del parámetro fecha_adjudicacion.
-#   user_id (desconocido): Descripción del parámetro user_id.
-# Descripción: Breve descripción de lo que hace la función create_licitacion.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   external_id (cadena): Identificador externo de la licitación, por ejemplo de otro SI.
+#   title (cadena): Título de la licitación
+#   description (cadena): Descripción de la licitación. Por ejemplo aqui se incluye el objeto.
+#   fecha_inicio (date): Fecha de inicio cuando se comienza a preparar la licitación.
+#   fecha_adjudicacion (date): Fehaa de adjudicación o finalización de la licitación.
+#   user_id (entero): Usuario responsable de la licitación.
+# Descripción: La función licitación crea una licitación a partir de los datos introducidos en el formulario
+#              por el usuario responsable.
+# Retorna: Identificador de la licitación (entero)
 def create_licitacion( external_id, title, description, fecha_inicio, fecha_adjudicacion, user_id):
     db = get_db(current_app)
 
@@ -58,15 +60,16 @@ def create_licitacion( external_id, title, description, fecha_inicio, fecha_adju
 
 # Función: edit_licitacion
 # Parámetros:
-#   lic_id (desconocido): Descripción del parámetro lic_id.
-#   external_id (desconocido): Descripción del parámetro external_id.
-#   title (desconocido): Descripción del parámetro title.
-#   description (desconocido): Descripción del parámetro description.
-#   fecha_inicio (desconocido): Descripción del parámetro fecha_inicio.
-#   fecha_adjudicacion (desconocido): Descripción del parámetro fecha_adjudicacion.
-#   user_id (desconocido): Descripción del parámetro user_id.
-# Descripción: Breve descripción de lo que hace la función edit_licitacion.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   lic_id (entero): Identificador de la licitación a modificar.
+#   external_id (cadena): Identificador externo de la licitación, por ejemplo de otro SI.
+#   title (cadena): Título de la licitación
+#   description (cadena): Descripción de la licitación. Por ejemplo aqui se incluye el objeto.
+#   fecha_inicio (date): Fecha de inicio cuando se comienza a preparar la licitación.
+#   fecha_adjudicacion (date): Fehaa de adjudicación o finalización de la licitación.
+#   user_id (entero): Usuario responsable de la licitación.
+# Descripción: La función licitación edita una licitación a partir de los datos introducidos en el formulario
+#              por el usuario responsable.
+# Retorna: Ninguno
 def edit_licitacion( lic_id, external_id, title, description, fecha_inicio, fecha_adjudicacion, user_id):
     db = get_db(current_app)
 
@@ -79,10 +82,11 @@ def edit_licitacion( lic_id, external_id, title, description, fecha_inicio, fech
 
 # Función: remove_licitacion
 # Parámetros:
-#   lic_id (desconocido): Descripción del parámetro lic_id.
-#   user_id (desconocido): Descripción del parámetro user_id.
-# Descripción: Breve descripción de lo que hace la función remove_licitacion.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   lic_id (entero): Identificador de la licitación que queremos borrar.
+#   user_id (entero): Identificador del usuario con rol reponsable que va a borrar la licitación.
+# Descripción: Esta función elimina una icitación, siempre y cuando no haya pasado de la etapa
+#              "Borrador".
+# Retorna: Ninguno.
 def remove_licitacion( lic_id, user_id):
     db = get_db(current_app)
 
@@ -114,39 +118,47 @@ from models.licitaciones_evaluadores_data import (
 
 # Función: list_evaluadores_logic
 # Parámetros: Ninguno
-# Descripción: Breve descripción de lo que hace la función list_evaluadores_logic.
-# Retorna: desconocido - Descripción del valor devuelto.
+# Descripción: Esta función obtiene todos los usuarios con rol evaluador para mostrarla en la ventana
+#              de selección evaluadores de una licitación.
+# Retorna: lista de datos de evaluadores
 def list_evaluadores_logic():
     db = get_db(current_app)
     return list_evaluadores(db)
 
 # Función: get_evaluadores_for_licitacion
 # Parámetros:
-#   lic_id (desconocido): Descripción del parámetro lic_id.
-# Descripción: Breve descripción de lo que hace la función get_evaluadores_for_licitacion.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   lic_id (entero): Identificador de la licitación que se está tramitando.
+# Descripción: Esta función obtiene todos los usuarios con el rol evaluador para mostrarlos en la ventana
+#              de evaluadores seleccionados para una licitación.
+# Retorna: lista de identificadores asociados a la licitación.
 def get_evaluadores_for_licitacion( lic_id):
     db = get_db(current_app)
     return list_evaluadores_by_licitacion(db, lic_id)
 
 # Función: assign_evaluadores
 # Parámetros:
-#   lic_id (desconocido): Descripción del parámetro lic_id.
-#   user_ids (desconocido): Descripción del parámetro user_ids.
-#   user_id (desconocido): Descripción del parámetro user_id.
-# Descripción: Breve descripción de lo que hace la función assign_evaluadores.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   lic_id (entero): Identificador de la licitación que se está tramitando.
+#   user_ids (lista): Lista de identificadores de usuarios .
+#   user_id (entero): Identificador del usuario que realiza el cambio.
+# Descripción: Esta función se utiliza para asignar los evaluadores a una licitación dada. En 
+#              este caso se registrará en el log el evento de asignar usuarios.
+# Retorna: lista de datos de los usuarios asignados.
 def assign_evaluadores( lic_id, user_ids,user_id):
     db = get_db(current_app)
+    
+    # Se guarda en el log quien asignó los evaluadores a una licitación
     nombre_usuario=get_username_by_id(db,user_id)
     log_event(db,nombre_usuario,"asignar_evaluadores",f'evaluadores_id: {user_ids}')
+    
+    # Se llama a la función de la capa de datos para asignar los usuarios
     return _assign_evaluadores(db, lic_id, user_ids)
 
 # Función: obtener_licitacion_por_id
 # Parámetros:
-#   licitacion_id (desconocido): Descripción del parámetro licitacion_id.
-# Descripción: Breve descripción de lo que hace la función obtener_licitacion_por_id.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   licitacion_id (entero): Identificador de la licitación de la que queremos obtener los datos.
+# Descripción: Esta función obtiene los datos de una licitación a partir del identificador de la licitación
+#              comunicada en el parámetro.
+# Retorna: diccionario de datos de la licitación.
 def obtener_licitacion_por_id(licitacion_id):
     """Devuelve la licitación como dict"""
     db = get_db(current_app)
@@ -155,8 +167,8 @@ def obtener_licitacion_por_id(licitacion_id):
 
 # Función: get_formulas_logic
 # Parámetros: Ninguno
-# Descripción: Breve descripción de lo que hace la función get_formulas_logic.
-# Retorna: desconocido - Descripción del valor devuelto.
+# Descripción: Obtiene las fórmulas que se pueden aplicar a los criterios económicos de una licitación.
+# Retorna: lista de formulas de.
 def get_formulas_logic():
     """Devuelve las fórmulas de evaluación disponibles"""
     db = get_db(current_app)

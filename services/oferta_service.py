@@ -5,18 +5,20 @@ from models.dao import list_ofertas_by_licitacion, update_admitidasobre1
 
 # Función: list_ofertas_logic
 # Parámetros:
-#   licitacion_id (desconocido): Descripción del parámetro licitacion_id.
-# Descripción: Breve descripción de lo que hace la función list_ofertas_logic.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   licitacion_id (entero): Identificador de la licitación de la que queremos obtener los datos de las ofertas.
+# Descripción: Esta función obtiene los datos de las ofertas de la licitación cuyo identificador coincide
+#              con el parametro de la función.
+# Retorna: Lista  de ofertas.
 def list_ofertas_logic(licitacion_id=None):
     db = get_db(current_app)
     return list_ofertas(db, licitacion_id)
 
 # Función: list_ofertas_admitidas_logic
 # Parámetros:
-#   licitacion_id (desconocido): Descripción del parámetro licitacion_id.
-# Descripción: Breve descripción de lo que hace la función list_ofertas_admitidas_logic.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   licitacion_id (entero): Identificador de la licitación de la que queremos obtener los datos de las ofertas.
+# Descripción: Esta función obtiene los datos de las ofertas admitidas en la fase Sobre1 y que cuyo identificador
+#              de la licitación con el parametro de la función.
+# Retorna: Lista  de ofertas admitidas en la fase Sobre1.
 def list_ofertas_admitidas_logic(licitacion_id=None):
     db = get_db(current_app)
     return list_ofertas_admitidas(db, licitacion_id)

@@ -9,11 +9,12 @@ Fórmulas para evaluación de ofertas económicas:
 
 # Función: inversa_proporcional
 # Parámetros:
-#   puntuacion_maxima (desconocido): Descripción del parámetro puntuacion_maxima.
-#   oferta (desconocido): Descripción del parámetro oferta.
-#   mejor_oferta (desconocido): Descripción del parámetro mejor_oferta.
-# Descripción: Breve descripción de lo que hace la función inversa_proporcional.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   puntuacion_maxima (número): Es la puntuación máxima que se puede conceder a una oferta.
+#   oferta (número): Es el valor económico que oferta una empresa licitante 
+#   mejor_oferta (número): Es el valor de la mejor oferta realizada en la licitación.
+# Descripción: Esta función calcula en base a la formula proporcional inversa la puntuación
+#              que obtiene una oferta determinada en un criterio económico. 
+# Retorna: resultado (número) si es mayor que 0
 def inversa_proporcional(puntuacion_maxima, oferta, mejor_oferta):
     try:
         pm = float(puntuacion_maxima)
@@ -33,12 +34,13 @@ def inversa_proporcional(puntuacion_maxima, oferta, mejor_oferta):
 
 # Función: proporcional_baja_con_presupuesto
 # Parámetros:
-#   puntuacion_maxima (desconocido): Descripción del parámetro puntuacion_maxima.
-#   oferta (desconocido): Descripción del parámetro oferta.
-#   mejor_oferta (desconocido): Descripción del parámetro mejor_oferta.
-#   presupuesto_base (desconocido): Descripción del parámetro presupuesto_base.
-# Descripción: Breve descripción de lo que hace la función proporcional_baja_con_presupuesto.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   puntuacion_maxima (número): Es la puntuación máxima que se puede conceder a una oferta.
+#   oferta (número): Es el valor económico que oferta una empresa licitante 
+#   mejor_oferta (número): Es el valor de la mejor oferta realizada en la licitación.
+#   presupuesto_base (número): Es el presupuesto base (El mínimo que se puede ofertar)
+# Descripción: Esta función calcula en base a la formula proporcional a la baja con presupuesto base 
+#              la puntuación que obtiene una oferta determinada en un criterio económico. 
+# Retorna: resultado (número) si es mayor que 0
 def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, mejor_oferta, presupuesto_base):
     try:
         pm = float(puntuacion_maxima)
@@ -78,11 +80,12 @@ def proporcional_baja_con_presupuesto(puntuacion_maxima, oferta, mejor_oferta, p
 
 # Función: reparto_proporcional
 # Parámetros:
-#   puntuacion_total (desconocido): Descripción del parámetro puntuacion_total.
-#   ofertas (desconocido): Descripción del parámetro ofertas.
-#   precio_base (desconocido): Descripción del parámetro precio_base.
-# Descripción: Breve descripción de lo que hace la función reparto_proporcional.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   puntuacion_total (número): Es la puntuación total que se pueden obtener entre todas las ofertas.
+#   ofertas (lista): Son las ofertas que se han presentado para evaluar. 
+#   presupuesto_base (número): Es el presupuesto base (El mínimo que se puede ofertar)
+# Descripción: Esta función calcula en base a la formula del reparto proporcional la puntuación
+#              que obtiene una oferta determinada en un criterio económico. 
+# Retorna: lista de resultados
 def reparto_proporcional(puntuacion_total, ofertas, precio_base):
     """
     Reparte pto_total entre varias ofertas usando la fórmula inversa
@@ -133,11 +136,13 @@ def reparto_proporcional(puntuacion_total, ofertas, precio_base):
 
 # Función: es_oferta_anormalmente_baja
 # Parámetros:
-#   oferta (desconocido): Descripción del parámetro oferta.
-#   ofertas_ponderadas (desconocido): Descripción del parámetro ofertas_ponderadas.
-#   presupuesto_base (desconocido): Descripción del parámetro presupuesto_base.
-# Descripción: Breve descripción de lo que hace la función es_oferta_anormalmente_baja.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   oferta (número): Es el valor económico que oferta una empresa licitante
+#   ofertas_ponderadas (lista): Son los valores de las puntuaciones de las ofertas ya ponderadas.
+#   presupuesto_base (número): Es el presupuesto base (El mínimo que se puede ofertar)
+# Descripción: Esta función calcula si una función se puede considerar anormalmente baja teniendo
+#              en cuenta el valor de la oferta respecto a las demás ofertas y el presupuesto_base
+#              siguiendo la fórmula descrita en el Art.85 RGLCAP.
+# Retorna: verdadero (1) o falso (0)
 def es_oferta_anormalmente_baja(oferta, ofertas_ponderadas, presupuesto_base=None):
     try:
         of = float(oferta)
