@@ -89,8 +89,7 @@ def evaluar(licitacion_id):
         return redirect(url_for('auth.login'))
 
     usuario_id = session['user_id']
-    #db = get_db(current_app)
-
+   
     # POST: guardar o actualizar evaluaciones
     if request.method == 'POST':
         ofertas = list_ofertas_admitidas_logic(licitacion_id)
@@ -158,7 +157,6 @@ def informe(licitacion_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    #db = get_db(current_app)
 
     # 1) Recuperar datos de la licitación si los necesitas
     lic = obtener_licitacion_por_id(licitacion_id)

@@ -30,7 +30,6 @@ def index():
     if 'user_id' not in session or session.get('role_id') != 2:
         return redirect(url_for('auth.login'))
 
-    #db = get_db(current_app)
     user_id = session.get('user_id')
 
     lic_rows = list_licitaciones()
@@ -99,7 +98,7 @@ def index():
 def avanzar_estado(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+    
     fecha_avance = request.form.get('fecha_avance')
     try:
         siguiente = advance_stage(lic_id, fecha_avance,session['user_id'])
@@ -113,7 +112,7 @@ def avanzar_estado(lic_id):
 def create_licitacion_route():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+   
     if request.method == 'POST':
         data = request.form
         try:
@@ -136,7 +135,7 @@ def create_licitacion_route():
 def edit_licitacion_route(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+    
     lic = get_licitacion(lic_id)
     if not lic:
         flash('No existe la licitación', 'error')
@@ -187,7 +186,7 @@ def edit_licitacion_route(lic_id):
 def delete_licitacion_route(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+    
     try:
         remove_licitacion( lic_id, session.get('user_id'))
     except PermissionError:
@@ -202,7 +201,7 @@ def delete_licitacion_route(lic_id):
 def evaluadores_licitacion(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+    
     lic = get_licitacion(lic_id)
     current_stage = get_current_stage_name(lic_id)
     if current_stage not in ('Borrador', 'Iniciada'):
@@ -224,7 +223,7 @@ def evaluar_sobre3(licitacion_id):
     if 'user_id' not in session or session.get('role_id') != 2:
         return redirect(url_for('auth.login'))
     usuario_id = session['user_id']
-    #db = get_db(current_app)
+    
 
     # 2. Obtener todas las fórmulas para mostrar nombre de fórmula
     formulas_list = get_formulas_logic()

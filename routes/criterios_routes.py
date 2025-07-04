@@ -53,7 +53,7 @@ def index(lic_id):
 def create_criterio_route(lic_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+    
     if request.method == 'POST':
         try:
             data = request.form.to_dict()
@@ -75,7 +75,7 @@ def create_criterio_route(lic_id):
 def edit_criterio_route(lic_id, crit_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+    
     crit = obtener( crit_id)
     if not crit:
         flash('Criterio no encontrado', 'danger')
@@ -99,7 +99,7 @@ def edit_criterio_route(lic_id, crit_id):
 def delete_criterio_route(lic_id, crit_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
-    #db = get_db(current_app)
+    
     try:
         borrar(lic_id,crit_id,session['user_id'])
         flash('Criterio eliminado', 'success')
