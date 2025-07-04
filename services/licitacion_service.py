@@ -1,4 +1,5 @@
 # services/licitacion_service.py
+
 from flask import current_app
 from models.licitaciones_data import (
     list_licitaciones as data_list,

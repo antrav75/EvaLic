@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#services/formulas_economicas_service.py
+
 """
 Fórmulas para evaluación de ofertas económicas:
  - inversa proporcional

@@ -1,4 +1,5 @@
 # services/licitante_service.py
+
 from flask import current_app
 from models.licitantes_data import list_licitantes, get_licitante, create_licitante, edit_licitante, remove_licitante,fetch_licitantes_por_licitacion
 from models.dao import get_db,get_username_by_id,log_event
@@ -94,6 +95,7 @@ def remove_licitante_logic(licitante_id,user_id):
 #   licitacion_id(entero):
 # Descripción: Función que devuelve los licitantes que participan en una licitación determinada.
 # Retorna: lista de datos de las empresas que participan en la licitación.
+def listar_licitantes_por_licitacion(licitacion_id):
     """
     Servicio que devuelve solo los licitantes que han participado en
     la licitación indicada (tienen evaluaciones registradas).

@@ -1,4 +1,5 @@
 # services/resultados_service.py
+
 from flask import current_app
 from models.dao import get_db
 from models.resultados_data import insert_resultados_tecnicos, insert_resultados_economicos, fetch_informe
@@ -6,9 +7,12 @@ from services.licitacion_service import get_evaluadores_for_licitacion
 
 # Función: generar_informe
 # Parámetros:
-#   licitacion_id (desconocido): Descripción del parámetro licitacion_id.
-# Descripción: Breve descripción de lo que hace la función generar_informe.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   licitacion_id (entero): Identificador de la licitación de la cual se va a generar el informe. 
+# Descripción: Obtiene y elabora el informe que se va a presentar en pantalla con los resultados 
+#              de las distintos sobres de una licitación (Sobre2- criterios técnicos y Sobre 3 - 
+#              criterios económicos) obteniendo los resultados totales e indicando cuando una oferta
+#              se puede considerar anormalmente baja.
+# Retorna: lista con los datos del informe
 def generar_informe(licitacion_id):
     """Genera y devuelve el informe técnico y económico, sobrescribiendo resultados previos"""
     db = get_db(current_app)

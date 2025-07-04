@@ -44,8 +44,12 @@
       </div>
 
       <!-- BOTONERA INFERIOR -->
-      <button type="submit" class="btn btn-primary">Guardar</button>
-
+      {% if current_stage != 'Cerrada' %}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      {% else %}
+        <button type="submit" class="btn btn-secondary ms-2 disabled">Guardar</button>
+      {% endif %}
+      
       <a href="{{ url_for('licitaciones.index') }}" class="btn btn-warning">Cancelar</a>
 
       {% if current_stage == 'Borrador' %}

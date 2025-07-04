@@ -1,3 +1,5 @@
+#services/user_service.py
+
 from flask import current_app
 from werkzeug.security import generate_password_hash
 from models.dao import (
@@ -7,11 +9,13 @@ from models.dao import (
 
 # Función: list_users
 # Parámetros:
-#   search (desconocido): Descripción del parámetro search.
-#   role_id (desconocido): Descripción del parámetro role_id.
-#   page (desconocido): Descripción del parámetro page.
-# Descripción: Breve descripción de lo que hace la función list_users.
-# Retorna: desconocido - Descripción del valor devuelto.
+#   search (cadena): Parametro utilizado para la busqueda en el filtro.
+#   role_id (desconocido): Identificador del rol de usuario.
+#   page (integer): Parámetro page utilizado para la paginación .
+# Descripción: Esta función devuelve los datos de los usuarios de la aplicación para que se muestren
+# en la página principal de forma paginada (max.5 por página) y se permita el filtro de usuarios por 
+# los datos.
+# Retorna: lista de datos de lo usuarios paginada.
 def list_users(search, role_id, page):
     db = get_db(current_app)
     users, total, pages = fetch_users(db, search, role_id, page)
@@ -25,8 +29,8 @@ def list_users(search, role_id, page):
 
 # Función: create_user
 # Parámetros:
-#   session (desconocido): Descripción del parámetro session.
-#   username (desconocido): Descripción del parámetro username.
+#   session (lista): datos de la sesión del usuario actual.
+#   username (cadena): nombre de usuario.
 #   email (desconocido): Descripción del parámetro email.
 #   password (desconocido): Descripción del parámetro password.
 #   role_id (desconocido): Descripción del parámetro role_id.

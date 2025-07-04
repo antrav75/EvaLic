@@ -1,3 +1,5 @@
+# services/auth_service.py
+
 from flask import current_app
 from werkzeug.security import check_password_hash
 from models.dao import get_user_by_username, log_event,get_db
