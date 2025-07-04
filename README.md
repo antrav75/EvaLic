@@ -58,6 +58,10 @@ La aplicación estará disponible en `http://127.0.0.1:5000/` (modo debug).
 - **Gestión de licitaciones, licitantes y ofertas**: accede a los apartados correspondientes en el menú.  
 - **Evaluación**: el rol Evaluador verá sus tareas de evaluación y podrá generar informes.
 
+Puedes acceder para gestionar los usuarios con el siguiente usuario y contraseña:
+
+Username: admin
+Contraseña: tfg_unir
 ---
 
-Si tienes cualquier duda o encuentras errores, abre un _issue_ o contacta al autor del TFG. ¡Éxito con tu defensa!
+Si tienes cualquier duda o encuentras errores, abre un _issue_ o contacta al autor de esta aplicación. 
