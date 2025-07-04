@@ -60,8 +60,9 @@ La aplicación estará disponible en `http://127.0.0.1:5000/` (modo debug).
 
 Puedes acceder para gestionar los usuarios con el siguiente usuario y contraseña:
 
-Username: admin
+```Username: admin
 Contraseña: tfg_unir
+```
 ---
 
 Si tienes cualquier duda o encuentras errores, abre un _issue_ o contacta al autor de esta aplicación. 
